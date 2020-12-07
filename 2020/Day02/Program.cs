@@ -10,6 +10,12 @@ namespace Day02
 
         static void Main(string[] args)
         {
+            PolicyOne();
+            PolicyTwo();
+        }
+
+        private static void PolicyOne()
+        {
             var validCount = 0;
 
             foreach (var line in _input.Split("\r\n"))
@@ -26,7 +32,28 @@ namespace Day02
                     validCount++;
             }
 
-            Console.WriteLine($"There are {validCount} valid passwords");
+            Console.WriteLine($"There are {validCount} valid passwords in policy one");
+        }
+        private static void PolicyTwo()
+        {
+            var validCount = 0;
+
+            foreach (var line in _input.Split("\r\n"))
+            {
+                var matches = _parser.Match(line);
+                var p1 = int.Parse(matches.Groups["min"].Value) - 1;
+                var p2 = int.Parse(matches.Groups["max"].Value) - 1;
+                var letter = matches.Groups["letter"].Value[0];
+                var password = matches.Groups["password"].Value;
+
+                if ((password[p1].Equals(letter) && !password[p2].Equals(letter))
+                    || (!password[p1].Equals(letter) && password[p2].Equals(letter)))
+                {
+                    validCount++;
+                }
+            }
+
+            Console.WriteLine($"There are {validCount} valid passwords in policy two");
         }
 
         private static string _input = 
