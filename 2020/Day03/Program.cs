@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Day03
@@ -13,9 +14,30 @@ namespace Day03
 
             var mapWidth = map[0].Length;
 
-            var across = 3;
-            var down = 1;
+            var slopes = new Tuple<int, int>[]
+            {
+                new Tuple<int, int>(1, 1),
+                new Tuple<int, int>(3, 1),
+                new Tuple<int, int>(5, 1),
+                new Tuple<int, int>(7, 1),
+                new Tuple<int, int>(1, 2)
+            };
 
+            long totalAnswer = 1;
+            foreach (var slope in slopes)
+            {
+                var across = slope.Item1;
+                var down = slope.Item2;
+                var treeCount = CountTrees(map, mapWidth, across, down);
+                totalAnswer = treeCount * totalAnswer;
+                Console.WriteLine($"You hit {treeCount} trees ({across} acress, {down} down)");
+            }
+
+            Console.WriteLine($"Full product of all slope tree counts: {totalAnswer}");
+        }
+
+        private static int CountTrees(char[][] map, int mapWidth, int across, int down)
+        {
             var x = 0;
             var y = 0;
 
@@ -33,11 +55,22 @@ namespace Day03
 
                 if (map[y][x].Equals('#'))
                     treeCount++;
-
             }
 
-            Console.WriteLine($"You hit {treeCount} trees");
+            return treeCount;
         }
+
+        private static string _test = @"..##.......
+#...#...#..
+.#....#..#.
+..#.#...#.#
+.#...##..#.
+..#.##.....
+.#.#.#....#
+.#........#
+#.##...#...
+#...##....#
+.#..#...#.#";
 
         private static string _input = @".##.............##......#.....#
 .#.#................#..........
