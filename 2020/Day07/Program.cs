@@ -20,8 +20,6 @@ namespace Day07
 
             Console.WriteLine($"all outer containers: {string.Join(',', outers.Distinct().OrderBy(x=>x))}");
             Console.WriteLine($"Bag count: {outers.Distinct().Count()}");
-            // 82 is incorrect
-            // 3 is incorrect
         }
 
         private static void SearchRulesForTarget(List<string> outers, string[] allRules, string target)
