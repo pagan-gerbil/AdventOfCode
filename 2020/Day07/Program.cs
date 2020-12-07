@@ -1,31 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Day07
 {
     class Program
     {
-        private static Regex _parser = new Regex(@"^(?<outer>.+) bags contain (?<contents>.+) bags.$");
+        private static Regex _parser = new Regex(@"^(?<outer>.+) bags contain (?<contents>.+).$");
         
         static void Main(string[] args)
         {
             var outers = new List<string>();
 
             string[] allRules = _input.Split("\r\n");
+            var target = "shiny gold bag";
 
+            SearchRulesForTarget(outers, allRules, target);
+
+            Console.WriteLine($"all outer containers: {string.Join(',', outers.Distinct().OrderBy(x=>x))}");
+            Console.WriteLine($"Bag count: {outers.Distinct().Count()}");
+            // 82 is incorrect
+            // 3 is incorrect
+        }
+
+        private static void SearchRulesForTarget(List<string> outers, string[] allRules, string target)
+        {
             foreach (var line in allRules)
             {
                 var match = _parser.Match(line);
                 var outer = match.Groups["outer"].Value;
+                if (outers.Contains(outer))
+                    continue;
+
                 var contents = match.Groups["contents"].Value;
 
-                if (contents.Contains("shiny gold bag"))
+                if (contents.Contains(target))
+                { 
                     outers.Add(outer);
+                    SearchRulesForTarget(outers, allRules, outer);
+                }
             }
-
-            Console.WriteLine($"First pass: {string.Join(',', outers)}");
-            Console.WriteLine($"First pass count: {outers.Count}");
         }
 
         private static string _input = @"dark orange bags contain 3 dark chartreuse bags.
