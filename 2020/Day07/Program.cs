@@ -8,7 +8,8 @@ namespace Day07
     class Program
     {
         private static Regex _parser = new Regex(@"^(?<outer>.+) bags contain (?<contents>.+).$");
-        
+        private static Regex _bagCounter = new Regex(@"^(?<number>[0-9]+) (?<colour>.+) (bag|bags)$");
+
         static void Main(string[] args)
         {
             var outers = new List<string>();
@@ -18,8 +19,33 @@ namespace Day07
 
             SearchRulesForTarget(outers, allRules, target);
 
+            var searchableRules = new Dictionary<string, string[]>();
+
+            foreach (var rule in allRules)
+            {
+                var match = _parser.Match(rule);
+                searchableRules.Add(match.Groups["outer"].Value, match.Groups["contents"].Value.Split(','));
+            }
+
+            var innerBagCount = SearchForInnerBag("shiny gold", searchableRules);
+
             Console.WriteLine($"all outer containers: {string.Join(',', outers.Distinct().OrderBy(x=>x))}");
             Console.WriteLine($"Bag count: {outers.Distinct().Count()}");
+
+            Console.WriteLine();
+            Console.WriteLine($"All inner bags count: {innerBagCount}");
+
+        }
+
+        private static int SearchForInnerBag(string key, Dictionary<string, string[]> searchableRules)
+        {
+            return searchableRules[key].Select(line =>
+            {
+                var match = _bagCounter.Match(line.Trim());
+                if (!match.Success) return 0;
+                var number = int.Parse(match.Groups["number"].Value);
+                return number + (number * SearchForInnerBag(match.Groups["colour"].Value, searchableRules));
+            }).Sum();
         }
 
         private static void SearchRulesForTarget(List<string> outers, string[] allRules, string target)
