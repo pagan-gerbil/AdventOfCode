@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Day05
 {
@@ -8,6 +9,8 @@ namespace Day05
         {
             var highestId = 0;
             var printIds = false;
+
+            var allPasses = new List<int>();
 
             foreach (var pass in _input.Split(Environment.NewLine))
             {
@@ -47,11 +50,24 @@ namespace Day05
                 var id = (row * 8) + column;
                 if (id > highestId) highestId = id;
                 if (printIds) Console.WriteLine($"row {row}, column {column}, id {id}");
+                allPasses.Add(id);
             }
 
             Console.WriteLine($"Highest ID is {highestId}");
-            // 1023 is too high
-            // 982 is too low
+
+            foreach (var i in allPasses)
+            {
+                if (!allPasses.Contains(i + 1))
+                {
+                    Console.WriteLine($"Your seat is {i + 1}");
+                }
+
+                if (!allPasses.Contains(i - 1))
+                {
+                    Console.WriteLine($"Your seat is {i - 1}");
+                }
+            }
+
         }
 
         private static string _input = @"FBFFBFFRLL
