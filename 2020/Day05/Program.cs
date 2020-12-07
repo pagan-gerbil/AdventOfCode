@@ -7,9 +7,9 @@ namespace Day05
         static void Main(string[] args)
         {
             var highestId = 0;
-            var printIds = true;
+            var printIds = false;
 
-            foreach (var pass in _test.Split(Environment.NewLine))
+            foreach (var pass in _input.Split(Environment.NewLine))
             {
                 var bottom = 0;
                 var top = 127;
