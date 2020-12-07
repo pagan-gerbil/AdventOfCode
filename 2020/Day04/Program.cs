@@ -1,12 +1,29 @@
 ﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Day04
 {
     class Program
     {
-        static void Main(string[] args)
+         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+            var items = _input.Split("\r\n\r\n").Select(x => x.Split(new string[] { " ", Environment.NewLine }, StringSplitOptions.None));
+
+            var required = new[]
+            {
+                "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"
+            };
+
+            var numberValid = 0;
+            foreach (var passport in items)
+            {
+                if (required.All(x => passport.Any(y => y.StartsWith(x))))
+                    numberValid++;
+            }
+
+            Console.WriteLine($"There are {numberValid} valid passports");
         }
 
         private static string _input = @"eyr:2033
