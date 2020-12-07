@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Day06
 {
@@ -6,7 +7,12 @@ namespace Day06
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var totalSums = _input
+                .Split("\r\n\r\n")
+                .Select(x => x.Replace("\r\n", string.Empty).ToCharArray().Distinct().Count())
+                .Sum();
+
+            Console.WriteLine($"Total sums of all groups: {totalSums}");
         }
 
         private static string _input = @"jmqnkzlsfedaptx
