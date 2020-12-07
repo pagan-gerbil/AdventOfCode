@@ -7,12 +7,24 @@ namespace Day06
     {
         static void Main(string[] args)
         {
-            var totalSums = _input
+            var totalSums1 = _input
                 .Split("\r\n\r\n")
                 .Select(x => x.Replace("\r\n", string.Empty).ToCharArray().Distinct().Count())
                 .Sum();
 
-            Console.WriteLine($"Total sums of all groups: {totalSums}");
+            Console.WriteLine($"Total sums of all groups (OR specification): {totalSums1}");
+
+            var totalSums2 = _input
+                .Split("\r\n\r\n")
+                .Select(peopleJoin =>
+                {
+                    var chars = peopleJoin.Replace("\r\n", string.Empty).ToCharArray().Distinct();
+                    var people = peopleJoin.Split("\r\n");
+                    return chars.Count(c => people.All(person => person.Contains(c)));
+                })
+                .Sum();
+
+            Console.WriteLine($"Total sums of all groups (AND specification): {totalSums2}");
         }
 
         private static string _input = @"jmqnkzlsfedaptx
