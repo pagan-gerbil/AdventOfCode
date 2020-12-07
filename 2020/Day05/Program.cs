@@ -7,41 +7,51 @@ namespace Day05
         static void Main(string[] args)
         {
             var highestId = 0;
+            var printIds = true;
 
-            foreach (var pass in _input.Split(Environment.NewLine))
+            foreach (var pass in _test.Split(Environment.NewLine))
             {
                 var bottom = 0;
                 var top = 127;
                 var left = 0;
                 var right = 7;
 
+                var row = 0;
+                var column = 0;
+
                 foreach (char c in pass)
                 {
-                    var diffRow = top - bottom;
-                    var diffCol = right - left;
+                    var diffRow = ((top + 1) - bottom) / 2;
+                    var diffCol = ((right + 1) - left) / 2;
                     switch(c)
                     {
                         case 'F':
                             top -= diffRow;
+                            row = bottom;
                             break;
                         case 'B':
                             bottom += diffRow;
+                            row = top;
                             break;
                         case 'L':
                             right -= diffCol;
+                            column = left;
                             break;
                         case 'R':
                             left += diffCol;
+                            column = right;
                             break;
                     }
                 }
 
-                var id = (bottom * 8) + left;
+                var id = (row * 8) + column;
                 if (id > highestId) highestId = id;
+                if (printIds) Console.WriteLine($"row {row}, column {column}, id {id}");
             }
 
             Console.WriteLine($"Highest ID is {highestId}");
-            //  1023 is too high
+            // 1023 is too high
+            // 982 is too low
         }
 
         private static string _input = @"FBFFBFFRLL
@@ -989,5 +999,9 @@ BFBFBFFLRR
 FFFBFFBLRR
 BBFBBFBRRR
 FBBFBBFLRL";
+
+        private static string _test = @"BFFFBBFRRR
+FFFBBBFRRR
+BBFFBBFRLL";
     }
 }
