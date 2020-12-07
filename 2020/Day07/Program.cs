@@ -1,12 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Day07
 {
     class Program
     {
+        private static Regex _parser = new Regex(@"^(?<outer>.+) bags contain (?<contents>.+) bags.$");
+        
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var outers = new List<string>();
+
+            string[] allRules = _input.Split("\r\n");
+
+            foreach (var line in allRules)
+            {
+                var match = _parser.Match(line);
+                var outer = match.Groups["outer"].Value;
+                var contents = match.Groups["contents"].Value;
+
+                if (contents.Contains("shiny gold bag"))
+                    outers.Add(outer);
+            }
+
+            Console.WriteLine($"First pass: {string.Join(',', outers)}");
+            Console.WriteLine($"First pass count: {outers.Count}");
         }
 
         private static string _input = @"dark orange bags contain 3 dark chartreuse bags.
