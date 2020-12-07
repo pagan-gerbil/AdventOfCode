@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Day02
@@ -16,11 +17,16 @@ namespace Day02
                 var matches = _parser.Match(line);
                 var min = int.Parse(matches.Groups["min"].Value);
                 var max = int.Parse(matches.Groups["max"].Value);
-                var letter = matches.Groups["letter"].Value;
+                var letter = matches.Groups["letter"].Value[0];
                 var password = matches.Groups["password"].Value;
 
-                Console.WriteLine($"{min}-{max} {letter}: {password}");
+                var numberOfTargetLetters = password.Count(x => x.Equals(letter));
+
+                if (numberOfTargetLetters >= min && numberOfTargetLetters <= max)
+                    validCount++;
             }
+
+            Console.WriteLine($"There are {validCount} valid passwords");
         }
 
         private static string _input = 
