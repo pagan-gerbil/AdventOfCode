@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Day03
 {
@@ -7,9 +8,38 @@ namespace Day03
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+
+            char[][] map = _input.Split(Environment.NewLine).Select(x => x.ToCharArray()).ToArray();
+
+            var mapWidth = map[0].Length;
+
+            var across = 3;
+            var down = 1;
+
+            var x = 0;
+            var y = 0;
+
+            var treeCount = 0;
+
+            while (y + down < map.Length)
+            {
+                y = y + down;
+                x = x + across;
+
+                if (x >= mapWidth)
+                {
+                    x = x - mapWidth;
+                }
+
+                if (map[y][x].Equals('#'))
+                    treeCount++;
+
+            }
+
+            Console.WriteLine($"You hit {treeCount} trees");
         }
 
-        private string _input = @".##.............##......#.....#
+        private static string _input = @".##.............##......#.....#
 .#.#................#..........
 ...#..#.##..#.#......#.#.#.#..#
 ..#......#........#..#..#.#.#..
