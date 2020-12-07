@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Day04
 {
@@ -10,19 +12,46 @@ namespace Day04
             Console.WriteLine("Hello World!");
             var items = _input.Split("\r\n\r\n").Select(x => x.Split(new string[] { " ", Environment.NewLine }, StringSplitOptions.None));
 
-            var required = new[]
+            var validation = new Dictionary<string, Predicate<string>>
             {
-                "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"
+                { "byr", x => int.Parse(x) >= 1920 && int.Parse(x) <= 2002 },
+                { "iyr", x => int.Parse(x) >= 2010 && int.Parse(x) <= 2020 },
+                { "eyr", x => int.Parse(x) >= 2020 && int.Parse(x) <= 2030 },
+                { "hgt", CheckHeight },
+                { "hcl", x => Regex.IsMatch(x, "#[0-9a-f]{6}") },
+                { "ecl", x => Regex.IsMatch(x, "(amb|blu|brn|gry|grn|hzl|oth)") },
+                { "pid", x => Regex.IsMatch(x, "[0-9]{9}") }
             };
 
             var numberValid = 0;
             foreach (var passport in items)
             {
-                if (required.All(x => passport.Any(y => y.StartsWith(x))))
+                if (passport.Length < 7 || passport.Length > 8)
+                    continue;
+
+                if (validation.Keys.All(x => passport.Any(y => y.StartsWith(x) && validation[x](y.Substring(4)))))
                     numberValid++;
             }
 
             Console.WriteLine($"There are {numberValid} valid passports");
+        }
+
+        private static bool CheckHeight(string input)
+        {
+            var regex = new Regex("(?<value>[0-9]+)(?<unit>cm|in)");
+            var match = regex.Match(input);
+            if (!match.Success)
+                return false;
+
+            var value = int.Parse(match.Groups["value"].Value);
+            switch (match.Groups["unit"].Value)
+            {
+                case "cm":
+                    return value >= 150 && value <= 193;
+                case "in":
+                    return value >= 59 && value <= 76;
+            }
+            return false;
         }
 
         private static string _input = @"eyr:2033
@@ -1129,5 +1158,19 @@ hgt:184 hcl:98fb9d pid:58151347
 iyr:2029
 
 hgt:183cm cid:187 byr:2019 ecl:xry iyr:2013 pid:164cm hcl:#18171d eyr:2021";
+
+        private static string _invalidTests = @"eyr:1972 cid:100
+hcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926
+
+iyr:2019
+hcl:#602927 eyr:1967 hgt:170cm
+ecl:grn pid:012533040 byr:1946
+
+hcl:dab227 iyr:2012
+ecl:brn hgt:182cm pid:021572410 eyr:2020 byr:1992 cid:277
+
+hgt:59cm ecl:zzz
+eyr:2038 hcl:74454a iyr:2023
+pid:3556412378 byr:2007";
     }
 }
