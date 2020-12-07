@@ -14,13 +14,13 @@ namespace Day04
 
             var validation = new Dictionary<string, Predicate<string>>
             {
-                { "byr", x => int.Parse(x) >= 1920 && int.Parse(x) <= 2002 },
-                { "iyr", x => int.Parse(x) >= 2010 && int.Parse(x) <= 2020 },
-                { "eyr", x => int.Parse(x) >= 2020 && int.Parse(x) <= 2030 },
+                { "byr", x=> int.Parse(x) >= 1920 && int.Parse(x) <= 2002 },
+                { "iyr", x=> int.Parse(x) >= 2010 && int.Parse(x) <= 2020 },
+                { "eyr", x=> int.Parse(x) >= 2020 && int.Parse(x) <= 2030 },
                 { "hgt", CheckHeight },
-                { "hcl", x => Regex.IsMatch(x, "#[0-9a-f]{6}") },
-                { "ecl", x => Regex.IsMatch(x, "(amb|blu|brn|gry|grn|hzl|oth)") },
-                { "pid", x => Regex.IsMatch(x, "[0-9]{9}") }
+                { "hcl", x=> Regex.IsMatch(x, "^#[0-9a-f]{6}$") },
+                { "ecl", x=> Regex.IsMatch(x, "^(amb|blu|brn|gry|grn|hzl|oth)$") },
+                { "pid", x => Regex.IsMatch(x, "^[0-9]{9}$") }
             };
 
             var numberValid = 0;
@@ -38,7 +38,7 @@ namespace Day04
 
         private static bool CheckHeight(string input)
         {
-            var regex = new Regex("(?<value>[0-9]+)(?<unit>cm|in)");
+            var regex = new Regex("^(?<value>[0-9]+)(?<unit>cm|in)$");
             var match = regex.Match(input);
             if (!match.Success)
                 return false;
