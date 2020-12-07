@@ -6,7 +6,42 @@ namespace Day05
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var highestId = 0;
+
+            foreach (var pass in _input.Split(Environment.NewLine))
+            {
+                var bottom = 0;
+                var top = 127;
+                var left = 0;
+                var right = 7;
+
+                foreach (char c in pass)
+                {
+                    var diffRow = top - bottom;
+                    var diffCol = right - left;
+                    switch(c)
+                    {
+                        case 'F':
+                            top -= diffRow;
+                            break;
+                        case 'B':
+                            bottom += diffRow;
+                            break;
+                        case 'L':
+                            right -= diffCol;
+                            break;
+                        case 'R':
+                            left += diffCol;
+                            break;
+                    }
+                }
+
+                var id = (bottom * 8) + left;
+                if (id > highestId) highestId = id;
+            }
+
+            Console.WriteLine($"Highest ID is {highestId}");
+            //  1023 is too high
         }
 
         private static string _input = @"FBFFBFFRLL
