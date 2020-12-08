@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Day08
@@ -18,7 +19,13 @@ namespace Day08
             for (var i = 0; i < allInstructions.Length; i++)
             {
                 if (alreadyVisited.Contains(i))
-                    break;
+                {
+                    Console.WriteLine($"The loop begins at {i}");
+                    Console.WriteLine($"The last instruction was {alreadyVisited.Last()}");
+                    break; 
+                }
+
+                alreadyVisited.Add(i);
 
                 var match = _parser.Match(allInstructions[i]);
                 switch (match.Groups["op"].Value)
@@ -32,11 +39,28 @@ namespace Day08
                         i += int.Parse(match.Groups["amount"].Value) - 1;
                         break;
                 }
-
-                alreadyVisited.Add(i);
             }
 
             Console.WriteLine($"The amount before repeating instructions is {currentValue}");
+
+            for (var i = 0; i < allInstructions.Length; i++)
+            {
+                var match = _parser.Match(allInstructions[i]);
+                var op = match.Groups["op"].Value;
+                var amount = int.Parse(match.Groups["amount"].Value);
+                if (op == "nop")
+                { 
+                    if (amount + i == allInstructions.Length)
+                        Console.WriteLine($"Change instruction on line {i} to terminate correctly");
+                }
+
+                if (op == "jmp")
+                {
+                    if (amount + i == allInstructions.Length)
+                        Console.WriteLine($"Hit instruction on line {i} to terminate correctly");
+                }
+
+            }
         }
 
         private static string _input = @"acc +8
