@@ -21,7 +21,7 @@ namespace Day08
                 if (alreadyVisited.Contains(i))
                 {
                     Console.WriteLine($"The loop begins at {i}");
-                    Console.WriteLine($"The last instruction was {alreadyVisited.Last()}");
+                    Console.WriteLine($"The last instruction was {allInstructions[alreadyVisited.Last()]} on line {alreadyVisited.Last()}");
                     break;
                 }
 
@@ -59,7 +59,7 @@ namespace Day08
                 {
                     if (amount + i == target)
                     {
-                        Console.WriteLine($"Change instruction on line {i} to terminate correctly");
+                        Console.WriteLine($"Change instruction {allInstructions[i]} on line {i} to terminate correctly");
                         FindInstructionToChange(allInstructions, i);
                         return;
                     }
@@ -69,7 +69,7 @@ namespace Day08
                 {
                     if (amount + i == target)
                     {
-                        Console.WriteLine($"Hit instruction on line {i} to terminate correctly");
+                        Console.WriteLine($"Hit instruction {allInstructions[i]} on line {i} to terminate correctly");
                         FindInstructionToChange(allInstructions, i);
                         return;
                     }
