@@ -22,7 +22,7 @@ namespace Day08
                 {
                     Console.WriteLine($"The loop begins at {i}");
                     Console.WriteLine($"The last instruction was {alreadyVisited.Last()}");
-                    break; 
+                    break;
                 }
 
                 alreadyVisited.Add(i);
@@ -43,24 +43,40 @@ namespace Day08
 
             Console.WriteLine($"The amount before repeating instructions is {currentValue}");
 
+            var target = allInstructions.Length;
+
+            FindInstructionToChange(allInstructions, target);
+        }
+
+        private static void FindInstructionToChange(string[] allInstructions, int target)
+        {
             for (var i = 0; i < allInstructions.Length; i++)
             {
                 var match = _parser.Match(allInstructions[i]);
                 var op = match.Groups["op"].Value;
                 var amount = int.Parse(match.Groups["amount"].Value);
                 if (op == "nop")
-                { 
-                    if (amount + i == allInstructions.Length)
+                {
+                    if (amount + i == target)
+                    {
                         Console.WriteLine($"Change instruction on line {i} to terminate correctly");
+                        FindInstructionToChange(allInstructions, i);
+                        return;
+                    }
                 }
 
                 if (op == "jmp")
                 {
-                    if (amount + i == allInstructions.Length)
+                    if (amount + i == target)
+                    {
                         Console.WriteLine($"Hit instruction on line {i} to terminate correctly");
+                        FindInstructionToChange(allInstructions, i);
+                        return;
+                    }
                 }
-
             }
+
+            FindInstructionToChange(allInstructions, target - 1);
         }
 
         private static string _input = @"acc +8
