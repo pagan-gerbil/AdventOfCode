@@ -1,12 +1,42 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Day08
 {
     class Program
     {
+        private static Regex _parser = new Regex(@"^(?<op>acc|nop|jmp) (?<amount>(\+|-)[0-9]+)$");
+
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var alreadyVisited = new List<int>();
+            var currentValue = 0;
+
+            var allInstructions = _input.Split(Environment.NewLine);
+
+            for (var i = 0; i < allInstructions.Length; i++)
+            {
+                if (alreadyVisited.Contains(i))
+                    break;
+
+                var match = _parser.Match(allInstructions[i]);
+                switch (match.Groups["op"].Value)
+                {
+                    case "nop":
+                        break;
+                    case "acc":
+                        currentValue += int.Parse(match.Groups["amount"].Value);
+                        break;
+                    case "jmp":
+                        i += int.Parse(match.Groups["amount"].Value) - 1;
+                        break;
+                }
+
+                alreadyVisited.Add(i);
+            }
+
+            Console.WriteLine($"The amount before repeating instructions is {currentValue}");
         }
 
         private static string _input = @"acc +8
