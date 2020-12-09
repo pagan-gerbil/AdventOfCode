@@ -8,34 +8,43 @@ namespace Day09
         static void Main(string[] args)
         {
             var numbers = _input.Split("\r\n").Select(x => long.Parse(x)).ToArray();
-            var invalid = GetInvalidNumber(numbers);
+            var preamble = 25;
+            var invalid = GetInvalidNumber(numbers, preamble);
 
-            for (var i = 25; i < numbers.Length; i++)
+            for (var i = 0; i < numbers.Length; i++)
             {
-                var currentNumber = numbers[i];
-                var counter = 1;
+                var currentNumber = 0l;
+
+                if (numbers[i] > invalid)
+                    continue;
+
+                var counter = -1;
                 while (currentNumber < invalid)
                 {
-                    currentNumber += numbers[i + counter];
                     counter++;
+                    currentNumber += numbers[i + counter];
                 }
 
                 if (currentNumber > invalid)
                     continue;
                 
-                Console.WriteLine($"The contiguous sequence number is {numbers[i]} + {numbers[i + counter]} = {numbers[i] + numbers[i + counter]}");
+                if (currentNumber == invalid)
+                    Console.WriteLine($"The contiguous sequence number is {numbers[i]} + {numbers[i + counter]} = {numbers[i] + numbers[i + counter]}");
             }
+            // 12178791 is too low
+
             // 211901470 is too high
+            // 249167128 is too high
 
         }
 
-        private static long GetInvalidNumber(long[] numbers)
+        private static long GetInvalidNumber(long[] numbers, int preamble)
         {
-            for (var i = 25; i < numbers.Length; i++)
+            for (var i = preamble; i < numbers.Length; i++)
             {
                 var currentNumber = numbers[i];
 
-                var previous = numbers.Skip(i - 25).Take(25);
+                var previous = numbers.Skip(i - preamble).Take(preamble);
                 var valid = false;
                 foreach (var candidate in previous)
                 {
@@ -1060,5 +1069,26 @@ namespace Day09
 81444181650545
 96338405591866
 97182323844583";
+
+        private static string _example = @"35
+20
+15
+25
+47
+40
+62
+55
+65
+95
+102
+117
+150
+182
+127
+219
+299
+277
+309
+576";
     }
 }
