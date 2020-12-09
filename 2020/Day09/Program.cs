@@ -25,11 +25,16 @@ namespace Day09
                     currentNumber += numbers[i + counter];
                 }
 
-                if (currentNumber > invalid)
+                if (currentNumber > invalid || counter < 1)
                     continue;
-                
+
                 if (currentNumber == invalid)
-                    Console.WriteLine($"The contiguous sequence number is {numbers[i]} + {numbers[i + counter]} = {numbers[i] + numbers[i + counter]}");
+                {
+                    var smallest = numbers.Skip(i).Take(counter).Min();
+                    var largest = numbers.Skip(i).Take(counter).Max();
+
+                    Console.WriteLine($"The contiguous sequence number is {smallest} + {largest} = {smallest + largest}"); 
+                }
             }
             // 12178791 is too low
 
