@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Day09
 {
@@ -6,7 +7,57 @@ namespace Day09
     {
         static void Main(string[] args)
         {
-            
+            var numbers = _input.Split("\r\n").Select(x => long.Parse(x)).ToArray();
+            var invalid = GetInvalidNumber(numbers);
+
+            for (var i = 25; i < numbers.Length; i++)
+            {
+                var currentNumber = numbers[i];
+                var counter = 1;
+                while (currentNumber < invalid)
+                {
+                    currentNumber += numbers[i + counter];
+                    counter++;
+                }
+
+                if (currentNumber > invalid)
+                    continue;
+                
+                Console.WriteLine($"The contiguous sequence number is {numbers[i]} + {numbers[i + counter]} = {numbers[i] + numbers[i + counter]}");
+            }
+            // 211901470 is too high
+
+        }
+
+        private static long GetInvalidNumber(long[] numbers)
+        {
+            for (var i = 25; i < numbers.Length; i++)
+            {
+                var currentNumber = numbers[i];
+
+                var previous = numbers.Skip(i - 25).Take(25);
+                var valid = false;
+                foreach (var candidate in previous)
+                {
+                    if (candidate > currentNumber)
+                        continue;
+
+                    if (previous.Contains(currentNumber - candidate))
+                    {
+                        valid = true;
+                        break;
+                    }
+                }
+
+                if (valid == false)
+                {
+                    Console.WriteLine($"Number {currentNumber} is not a sum of previous numbers");
+                    return currentNumber;
+                }
+
+            }
+
+            return 0;
         }
 
         private static string _input = @"1
