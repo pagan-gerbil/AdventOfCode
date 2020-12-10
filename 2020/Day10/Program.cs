@@ -7,7 +7,7 @@ namespace Day10
     {
         static void Main(string[] args)
         {
-            var adapters = _input
+            var adapters = _example
                 .Split(Environment.NewLine)
                 .Select(x => int.Parse(x));
             var device = adapters.Max() + 3;
@@ -37,6 +37,9 @@ namespace Day10
 
             Console.WriteLine($"{diff1} differences of 1 jolt; {diff3} differences of 3 jolt");
             Console.WriteLine($"Answer is {diff1 * diff3}");
+
+            var equal = adapters.Count() == adapters.Distinct().Count();
+            Console.WriteLine($"Adapaters are unique? {equal}");
         }
 
         private static string _example = @"16
@@ -175,5 +178,7 @@ namespace Day10
 45
 106
 41";
+
+
     }
 }
