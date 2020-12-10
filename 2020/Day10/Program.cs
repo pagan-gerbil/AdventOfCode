@@ -8,7 +8,7 @@ namespace Day10
     {
         static void Main(string[] args)
         {
-            var adapters = _example
+            var adapters = _input
                 .Split(Environment.NewLine)
                 .Select(x => int.Parse(x))
                 .ToList();
@@ -45,7 +45,7 @@ namespace Day10
             Console.WriteLine($"There are {permutations} permutations.");
         }
 
-        private static int GetPermutations(int input, IEnumerable<int> adapters)
+        private static long GetPermutations(int input, IEnumerable<int> adapters)
         {
             var possibles = adapters.Where(x => x - input <= 3 && x > input);
 
