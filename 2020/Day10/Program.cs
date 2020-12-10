@@ -7,7 +7,7 @@ namespace Day10
     {
         static void Main(string[] args)
         {
-            var adapters = _example
+            var adapters = _longerExample
                 .Split(Environment.NewLine)
                 .Select(x => int.Parse(x));
             var device = adapters.Max() + 3;
@@ -51,5 +51,36 @@ namespace Day10
 6
 12
 4";
+        private static string _longerExample = @"28
+33
+18
+42
+31
+14
+46
+20
+48
+47
+24
+23
+49
+45
+19
+38
+39
+11
+1
+32
+25
+35
+8
+17
+7
+9
+4
+2
+34
+10
+3";
     }
 }
