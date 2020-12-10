@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Day10
@@ -9,12 +10,13 @@ namespace Day10
         {
             var adapters = _example
                 .Split(Environment.NewLine)
-                .Select(x => int.Parse(x));
+                .Select(x => int.Parse(x))
+                .ToList();
             var device = adapters.Max() + 3;
-            
-            adapters = adapters
-                .Concat(new[] { device })
-                .OrderBy(x => x);
+
+            adapters.Add(device);
+
+            adapters = adapters.OrderBy(x => x).ToList();
 
             var diff1 = 0;
             var diff2 = 0;
@@ -38,14 +40,21 @@ namespace Day10
             Console.WriteLine($"{diff1} differences of 1 jolt; {diff3} differences of 3 jolt");
             Console.WriteLine($"Answer is {diff1 * diff3}");
 
-            var validJumps = adapters.Select(x => adapters.Count(y => y > x && y - x <= 3)).Where(x => x > 0);
-            var permutations = 1;
-            foreach (var jump in validJumps)
-            {
-                permutations *= jump;
-            }
+            var permutations = GetPermutations(0, adapters);
 
             Console.WriteLine($"There are {permutations} permutations.");
+        }
+
+        private static int GetPermutations(int input, IEnumerable<int> adapters)
+        {
+            var possibles = adapters.Where(x => x - input <= 3 && x > input);
+
+            if (input == adapters.Max())
+                return 1;
+
+            var answer = possibles.Sum(x => GetPermutations(x, adapters));
+
+            return answer;
         }
 
         private static string _example = @"16
