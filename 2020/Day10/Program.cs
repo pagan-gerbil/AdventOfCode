@@ -38,8 +38,14 @@ namespace Day10
             Console.WriteLine($"{diff1} differences of 1 jolt; {diff3} differences of 3 jolt");
             Console.WriteLine($"Answer is {diff1 * diff3}");
 
-            var equal = adapters.Count() == adapters.Distinct().Count();
-            Console.WriteLine($"Adapaters are unique? {equal}");
+            var validJumps = adapters.Select(x => adapters.Count(y => y > x && y - x <= 3)).Where(x => x > 0);
+            var permutations = 1;
+            foreach (var jump in validJumps)
+            {
+                permutations *= jump;
+            }
+
+            Console.WriteLine($"There are {permutations} permutations.");
         }
 
         private static string _example = @"16
