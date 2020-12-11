@@ -7,7 +7,7 @@ namespace Day11
     {
         static void Main(string[] args)
         {
-            var seatArray = _example2
+            var seatArray = _input
                 .Split(Environment.NewLine)
                 .Select(x => x.ToCharArray())
                 .ToArray();
@@ -37,7 +37,7 @@ namespace Day11
                                 }
                                 break;
                             case '#':
-                                if (count >= 4)
+                                if (count >= 5)
                                 {
                                     newSeatArray[row][col] = 'L';
                                     changed = true;
