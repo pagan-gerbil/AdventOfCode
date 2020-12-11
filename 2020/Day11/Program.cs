@@ -7,7 +7,7 @@ namespace Day11
     {
         static void Main(string[] args)
         {
-            var seatArray = _input
+            var seatArray = _example2
                 .Split(Environment.NewLine)
                 .Select(x => x.ToCharArray())
                 .ToArray();
@@ -23,7 +23,8 @@ namespace Day11
                 {
                     for (var col = 0; col < seatArray[row].Length; col++)
                     {
-                        var count = CountAdjacent(4, seatArray, row, col);
+                        //var count = CountAdjacent(4, seatArray, row, col);
+                        var count = CountInDirections(5, seatArray, row, col);
                         switch (seatArray[row][col])
                         {
                             case '.':
@@ -78,6 +79,46 @@ namespace Day11
 
             return counter;
         }
+
+        private static int CountInDirections(int cutoff, char[][] seatArray, int row, int col)
+        {
+            var rowStart = row == 0 ? 0 : -1;
+            var rowEnd = row == seatArray.Length - 1 ? 1 : 2;
+            var colStart = col == 0 ? 0 : -1;
+            var colEnd = col == seatArray[0].Length - 1 ? 1 : 2;
+            var counter = 0;
+
+            for (var rowMod = rowStart; rowMod < rowEnd; rowMod++)
+            {
+                for (var colMod = colStart; colMod < colEnd; colMod++)
+                {
+                    if (rowMod == 0 && colMod == 0)
+                        continue;
+
+                    var newRow = row + rowMod;
+                    var newCol = col + colMod;
+                    while (seatArray[newRow][newCol] == '.')
+                    {
+                        if ((newRow == 0 && rowMod < 0) || (newRow == seatArray.Length - 1 && rowMod > 0))
+                            break;
+                        if ((newCol == 0 && colMod < 0) || (newCol == seatArray[0].Length - 1 && colMod > 0))
+                            break;
+
+                        newRow = newRow + rowMod;
+                        newCol = newCol + colMod;
+                    }
+
+                    if (seatArray[newRow][newCol] == '#')
+                        counter++;
+
+                    if (counter == cutoff)
+                        return counter;
+                }
+            }
+
+            return counter;
+        }
+
 
         private static string _example = @"L.LL.LL.LL
 LLLLLLL.LL
