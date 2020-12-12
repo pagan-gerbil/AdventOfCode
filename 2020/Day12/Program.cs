@@ -25,7 +25,7 @@ namespace Day12
 
                 //Move(operation, amount, ref direction, ref xPos, ref yPos);
                 MoveWaypoint(operation, amount, ref xPos, ref yPos, ref xVel, ref yVel);
-                Console.WriteLine($"{instruction} - d {direction}, x {xPos}, y {yPos}");
+                Console.WriteLine($"{instruction} - d {direction}, x {xPos}, y {yPos}, vel: {xVel}, {yVel}");
                 //Console.ReadKey();
             }
 
@@ -42,14 +42,22 @@ namespace Day12
                     yPos += (yVel * amount);
                     break;
                 case "L":
-                    var temp1 = xVel;
-                    xVel = yVel * -1;
-                    yVel = temp1;
+                    while (amount > 0)
+                    {
+                        var temp1 = xVel;
+                        xVel = yVel * -1;
+                        yVel = temp1;
+                        amount -= 90;
+                    }
                     break;
                 case "R":
-                    var temp2 = xVel * -1;
-                    xVel = yVel;
-                    yVel = temp2;
+                    while(amount > 0)
+                    {
+                        var temp2 = xVel * -1;
+                        xVel = yVel;
+                        yVel = temp2;
+                        amount -= 90;
+                    }
                     break;
                 default:
                     Move(operation, amount, ref throwaway, ref xVel, ref yVel);
