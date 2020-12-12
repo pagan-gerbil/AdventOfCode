@@ -13,6 +13,8 @@ namespace Day12
 
             var xPos = 0;
             var yPos = 0;
+            var xVel = 10;
+            var yVel = 1;
             var direction = "E";
 
             foreach (var instruction in instructions)
@@ -21,12 +23,38 @@ namespace Day12
                 var operation = match.Groups["operation"].Value;
                 var amount = int.Parse(match.Groups["amount"].Value);
 
-                Move(operation, amount, ref direction, ref xPos, ref yPos);
+                //Move(operation, amount, ref direction, ref xPos, ref yPos);
+                MoveWaypoint(operation, amount, ref xPos, ref yPos, ref xVel, ref yVel);
                 Console.WriteLine($"{instruction} - d {direction}, x {xPos}, y {yPos}");
                 //Console.ReadKey();
             }
 
             Console.WriteLine($"The Manhattan distance is {Math.Abs(xPos)} + {Math.Abs(yPos)} = {Math.Abs(xPos) + Math.Abs(yPos)}");
+        }
+
+        private static void MoveWaypoint(string operation, int amount, ref int xPos, ref int yPos, ref int xVel, ref int yVel)
+        {
+            var throwaway = string.Empty;
+            switch(operation)
+            {
+                case "F":
+                    xPos += (xVel * amount);
+                    yPos += (yVel * amount);
+                    break;
+                case "L":
+                    var temp1 = xVel;
+                    xVel = yVel * -1;
+                    yVel = temp1;
+                    break;
+                case "R":
+                    var temp2 = xVel * -1;
+                    xVel = yVel;
+                    yVel = temp2;
+                    break;
+                default:
+                    Move(operation, amount, ref throwaway, ref xVel, ref yVel);
+                    break;
+            }
         }
 
         private static void Move(string operation, int amount, ref string direction, ref int xPos, ref int yPos)
