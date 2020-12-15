@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Day15
@@ -8,18 +9,26 @@ namespace Day15
         static void Main(string[] args)
         {
             var numbers = _input.Split(',').Select(x => int.Parse(x)).ToList();
-
-            var counter = numbers.Count();
-            while (counter < 2020)
+            var lastUsed = new Dictionary<int, int>();
+            var counter = 1;
+            foreach (var number in numbers.Take(6))
+            {
+                lastUsed.Add(number, counter);
+                counter++;
+            }
+            
+            while (counter < 30000000)
             {
                 var lastNumber = numbers.Last();
-                if (numbers.Count(x => x == lastNumber) > 1)
+                if (lastUsed.ContainsKey(lastNumber))
                 {
-                    numbers.Add( numbers.LastIndexOf(lastNumber) - numbers.Take(numbers.LastIndexOf(lastNumber)).ToList().LastIndexOf(lastNumber));
+                    numbers.Add(counter - lastUsed[lastNumber]);
+                    lastUsed[lastNumber] = counter;
                 }
-                else if (numbers.Count(x => x == lastNumber) == 1)
+                else
                 {
                     numbers.Add(0);
+                    lastUsed.Add(lastNumber, counter);
                 }
                 
                 counter++;
