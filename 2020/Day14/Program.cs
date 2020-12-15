@@ -8,44 +8,51 @@ namespace Day14
     {
         static void Main(string[] args)
         {
-            var lines = _example.Split(Environment.NewLine);
-
-            var mask = lines[0].Substring(7);
-            var instructions = lines.Skip(1)
-                .Select(x =>
-                {
-                    var firstIndex = x.IndexOf('[')+1;
-                    var lastIndex = x.LastIndexOf(']');
-
-                    return new Tuple<int, int>(int.Parse(x.Substring(firstIndex, lastIndex - firstIndex)), int.Parse(x.Substring(x.LastIndexOf(' '))));
-                }).Reverse();
+            var maskGroups = _input.Split("mask = ", StringSplitOptions.RemoveEmptyEntries).Reverse();
 
             var results = new Dictionary<int, int>();
 
-            var masks1 = mask.Reverse().Select((c, i) =>
+            foreach (var maskGroup in maskGroups)
             {
-                if (c == '1') return (int)Math.Pow(2, i);
-                return 0;
-            }).Where(x => x > 0).Sum();
+                var lines = maskGroup.Split(Environment.NewLine);
+                var mask = lines[0];
+                var instructions = lines.Skip(1)
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Select(x =>
+                    {
+                        var firstIndex = x.IndexOf('[') + 1;
+                        var lastIndex = x.LastIndexOf(']');
 
-            var masks0 = mask.Reverse().Select((c, i) =>
-            {
-                if (c == '0') return (int)Math.Pow(2, i);
-                return 0;
-            }).Where(x => x > 0).Sum();
+                        return new Tuple<int, int>(int.Parse(x.Substring(firstIndex, lastIndex - firstIndex)), int.Parse(x.Substring(x.LastIndexOf(' '))));
+                    }).Reverse();
 
-            foreach (var instruction in instructions)
-            {
-                if (results.ContainsKey(instruction.Item1))
-                    continue;
 
-                int value = instruction.Item2 | masks1;
-                value -= (value & masks0);
+                var masks1 = mask.Reverse().Select((c, i) =>
+                {
+                    if (c == '1') return (int)Math.Pow(2, i);
+                    return 0;
+                }).Where(x => x > 0).Sum();
 
-                results.Add(instruction.Item1, value);
+                var masks0 = mask.Reverse().Select((c, i) =>
+                {
+                    if (c == '0') return (int)Math.Pow(2, i);
+                    return 0;
+                }).Where(x => x > 0).Sum();
+
+                foreach (var instruction in instructions)
+                {
+                    if (results.ContainsKey(instruction.Item1))
+                        continue;
+
+                    int value = instruction.Item2 | masks1;
+                    value -= (value & masks0);
+
+                    results.Add(instruction.Item1, value);
+                }
             }
+            var longs = results.Values.Select(x => (long)x).Sum();
 
-            Console.WriteLine($"The sum of masked values is {results.Values.Sum()}");
+            Console.WriteLine($"The sum of masked values is {longs}");
         }
 
         private static string _example = @"mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X
@@ -53,7 +60,7 @@ mem[8] = 11
 mem[7] = 101
 mem[8] = 0";
 
-        private string _input = @"mask = X101011X011X10101011000001X00XX0X000
+        private static string _input = @"mask = X101011X011X10101011000001X00XX0X000
 mem[60126] = 9674686
 mem[39254] = 523988
 mem[54849] = 40771927
