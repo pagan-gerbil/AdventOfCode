@@ -8,23 +8,23 @@ namespace Day14
     {
         static void Main(string[] args)
         {
-            var maskGroups = _input.Split("mask = ", StringSplitOptions.RemoveEmptyEntries);//.Reverse();
+            var maskGroups = _input.Split("mask = ", StringSplitOptions.RemoveEmptyEntries).Reverse();
 
             var results = new Dictionary<int, int>();
 
             foreach (var maskGroup in maskGroups)
             {
-                var lines = maskGroup.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+                var lines = maskGroup.Split(Environment.NewLine);
                 var mask = lines[0];
                 var instructions = lines.Skip(1)
+                    .Where(x => !string.IsNullOrEmpty(x))
                     .Select(x =>
                     {
                         var firstIndex = x.IndexOf('[') + 1;
                         var lastIndex = x.LastIndexOf(']');
 
                         return new Tuple<int, int>(int.Parse(x.Substring(firstIndex, lastIndex - firstIndex)), int.Parse(x.Substring(x.LastIndexOf(' '))));
-                    });
-                        //}).Reverse();
+                    }).Reverse();
 
 
                 var masks1 = mask.Reverse().Select((c, i) =>
@@ -41,21 +41,19 @@ namespace Day14
 
                 foreach (var instruction in instructions)
                 {
+                    if (results.ContainsKey(instruction.Item1))
+                        continue;
 
                     int value = instruction.Item2 | masks1;
                     value -= (value & masks0);
 
-                    if (results.ContainsKey(instruction.Item1))
-                        results[instruction.Item2] = value;
-                    else
-                        results.Add(instruction.Item1, value);
+                    results.Add(instruction.Item1, value);
                 }
             }
             var longs = results.Values.Select(x => (long)x).Sum();
 
             Console.WriteLine($"The sum of masked values is {longs}");
             //546182597972 is too low
-            //629016376991 is too low
         }
 
         private static string _example = @"mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X
