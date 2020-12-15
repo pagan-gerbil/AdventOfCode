@@ -8,6 +8,7 @@ namespace Day02
         static void Main(string[] args)
         {
             var total = 0l;
+            var ribbon = 0l;
 
             foreach (var line in _input.Split(Environment.NewLine))
             {
@@ -21,10 +22,12 @@ namespace Day02
                 };
 
                 total += sides.Min() + (2 * sides.Sum());
-                
+
+                ribbon += (2 * numbers.OrderBy(x => x).Take(2).Sum()) + numbers.Aggregate(1l, (a, b) => a * b);                
             }
 
             Console.WriteLine($"Total amount of paper is: {total}");
+            Console.WriteLine($"Total length of ribbon is: {ribbon}");
         }
 
         private static string _example = @"2x3x4
