@@ -6,23 +6,24 @@ namespace Day18
 {
     class Program
     {
-        private static Regex _parantheses = new Regex(@"\((?<inner>.+)\)");
-        private static Regex _firstChunk = new Regex(@"^\(?(?<first>\d+) (?<op>[+\-*/]) (?<second>\d+)\)?");
+        private static Regex _parantheses = new Regex(@"\((?<inner>[0-9 +*]+)\)");
+        private static Regex _firstChunk = new Regex(@"^\(?(?<first>\d+) ((?<op>[+*]) (?<second>\d+))+\)?");
 
         static void Main(string[] args)
         {
-            var lines = _example.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var lines = _example2.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
             for (var i = 0; i < lines.Count(); i++)
             {
                 var line = lines[i];
-                var matches = _parantheses.Matches(line);
-                foreach (Match match in matches)
+                while(line.Contains('('))
                 {
-                    //if (match.Value.Contains('(') || match.Value.Contains(')'))
-                    //    continue;
-                    var result = Parse(match.Groups["inner"].Value);
-                    line = line.Replace($"{match.Value}", result.ToString());
+                    var matches = _parantheses.Matches(line);
+                    foreach (Match match in matches)
+                    {
+                        var result = Parse(match.Groups["inner"].Value);
+                        line = line.Replace($"{match.Value}", result.ToString());
+                    }
                 }
 
                 while (line.Any(x=>!char.IsDigit(x)))
@@ -40,7 +41,13 @@ namespace Day18
 
         private static int Parse(string input)
         {
-            return Parse(_firstChunk.Match(input));
+            while (input.Any(x => !char.IsDigit(x)))
+            {
+                var match = _firstChunk.Match(input);
+                var result = Parse(match);
+                input = input.Replace(match.Value, result.ToString());
+            }
+            return int.Parse(input);
         }
 
         private static int Parse(Match match)
@@ -61,5 +68,6 @@ namespace Day18
         }
 
         private static string _example = @"2 * 3 + (4 * 5)";
+        private static string _example2 = @"5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))";
     }
 }
