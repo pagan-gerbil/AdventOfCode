@@ -39,13 +39,7 @@ namespace Day20
 
             allTiles.Add(currentTile);
 
-            // find matches
-            var t1951 = allTiles.SingleOrDefault(x => x.Id == 3079);
-            var left = allTiles.Where(x => x.IsMatch(t1951.Left) && !x.Id.Equals(t1951.Id)).ToArray();
-            var right = allTiles.Where(x => x.IsMatch(t1951.Right) && !x.Id.Equals(t1951.Id)).ToArray();
-            var bottom = allTiles.Where(x => x.IsMatch(t1951.Bottom) && !x.Id.Equals(t1951.Id)).ToArray();
-            var top = allTiles.Where(x => x.IsMatch(t1951.Top) && !x.Id.Equals(t1951.Id)).ToArray();
-
+            // find corners
             var a = allTiles.Where(x => allTiles.Count(y => y.Id != x.Id && (y.IsMatch(x.Top) || y.IsMatch(x.Bottom) || y.IsMatch(x.Left) || y.IsMatch(x.Right))) == 2);
 
             var result = 1l;
