@@ -11,7 +11,7 @@ namespace Day20
             var currentTile = new Tile();
             var allTiles = new List<Tile>();
 
-            foreach (var line in _example.Split(Environment.NewLine))
+            foreach (var line in _input.Split(Environment.NewLine))
             {
                 if (string.IsNullOrEmpty(line))
                 {
