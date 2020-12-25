@@ -8,6 +8,13 @@ namespace Day20
     {
         static void Main(string[] args)
         {
+            var allTiles = CreateTiles();
+
+            var corners = GetCorners(allTiles);
+        }
+
+        private static List<Tile> CreateTiles()
+        {
             var currentTile = new Tile();
             var allTiles = new List<Tile>();
 
@@ -38,7 +45,11 @@ namespace Day20
             }
 
             allTiles.Add(currentTile);
+            return allTiles;
+        }
 
+        private static IEnumerable<Tile> GetCorners(List<Tile> allTiles)
+        {
             // find corners
             var a = allTiles.Where(x => allTiles.Count(y => y.Id != x.Id && (y.IsMatch(x.Top) || y.IsMatch(x.Bottom) || y.IsMatch(x.Left) || y.IsMatch(x.Right))) == 2);
 
@@ -49,6 +60,8 @@ namespace Day20
             }
 
             Console.WriteLine($"The corner ids multiply to create {result}");
+
+            return a;
         }
 
         public class Tile
