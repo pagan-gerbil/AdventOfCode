@@ -12,7 +12,9 @@ namespace Day02
         static void Main(string[] args)
         {
             var partOneAnswer = PartOne(input);
+            var partTwoAnswer = PartTwo(input);
             Console.WriteLine($"Part One: {partOneAnswer}");
+            Console.WriteLine($"Part Two: {partTwoAnswer}");
         }
 
         private static int PartOne(string input)
@@ -37,6 +39,40 @@ namespace Day02
                 if (dResult.Success)
                 {
                     depth += int.Parse(dResult.Groups["number"].Value);
+                    continue;
+                }
+            }
+
+            return depth * horizontal;
+        }
+
+        private static int PartTwo(string input)
+        {
+            var depth = 0;
+            var horizontal = 0;
+            var aim = 0;
+            foreach (var s in input.Split(Environment.NewLine))
+            {
+                var fResult = forwardRegex.Match(s);
+                if (fResult.Success)
+                {
+                    int number = int.Parse(fResult.Groups["number"].Value);
+                    horizontal += number;
+                    depth += (aim * number);
+                    continue;
+                }
+                var uResult = upRegex.Match(s);
+                if (uResult.Success)
+                {
+                    int number = int.Parse(uResult.Groups["number"].Value);
+                    aim -= number;
+                    continue;
+                }
+                var dResult = downRegex.Match(s);
+                if (dResult.Success)
+                {
+                    int number = int.Parse(dResult.Groups["number"].Value);
+                    aim += number;
                     continue;
                 }
             }
