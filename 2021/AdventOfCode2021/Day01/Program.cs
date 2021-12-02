@@ -6,6 +6,12 @@ namespace Day01
     {
         static void Main(string[] args)
         {
+            PartOne();
+            PartTwo();
+        }
+
+        private static void PartOne()
+        {
             int? last = null;
             var counter = 0;
             foreach (var s in input.Split(Environment.NewLine))
@@ -20,6 +26,33 @@ namespace Day01
                 }
 
                 last = current;
+            }
+
+            Console.WriteLine(counter);
+        }
+
+        private static void PartTwo()
+        {
+            int? window1 = null;
+            int? window2 = null;
+            var last = 0;
+            var counter = 0;
+            foreach (var s in input.Split(Environment.NewLine))
+            {
+                var current = int.Parse(s);
+                var total = 0;
+                if (window1.HasValue && window2.HasValue)
+                {
+                    total = window1.Value + window2.Value + current;
+                    if (last > 0 && total > last)
+                    {
+                        counter++;
+                    }
+                }
+
+                window1 = window2;
+                window2 = current;
+                last = total;
             }
 
             Console.WriteLine(counter);
