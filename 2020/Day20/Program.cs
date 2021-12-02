@@ -10,7 +10,111 @@ namespace Day20
         {
             var allTiles = CreateTiles();
 
-            var corners = GetCorners(allTiles);
+            var sideLength = Math.Sqrt(allTiles.Count);
+
+            var corners = GetCorners(allTiles).ToArray();
+
+            var topRow = GetRowRight(allTiles, corners);
+            var columns = new List<List<Tile>>();
+            while (allTiles.Count > 0)
+            {
+                var column = GetColumn(allTiles, topRow[columns.Count]);
+                if (column.Count < sideLength)
+                {
+                    allTiles.AddRange(column);
+                    foreach (var t in topRow)
+                    {
+                        t.Rotate += 180;
+                        if (t.Rotate >= 360) t.Rotate -= 360;
+                        t.Flip = !t.Flip;
+                    }
+                    continue;
+                }
+
+                columns.Add(column);
+            }
+        }
+
+        private static List<Tile> GetColumn(List<Tile> allTiles, Tile seedTile)
+        {
+            var row = new List<Tile>();
+            Tile next = seedTile;
+            while (next != null)
+            {
+                row.Add(next);
+                allTiles.Remove(next);
+                next = GetMatchDown(allTiles, row.Last());
+            }
+            return row;
+        }
+
+        private static Tile GetMatchDown(List<Tile> allTiles, Tile tile)
+        {
+            Tile match = null;
+
+            int rotation = 0;
+            bool flip = false;
+
+            while (match == null)
+            {
+                match = allTiles.SingleOrDefault(x => x.GetTransformedTop(rotation, flip) == tile.GetMatchBottom());
+                if (match != null)
+                {
+                    match.Rotate = rotation;
+                    match.Flip = flip;
+                    break;
+                }
+                rotation += 90;
+                if (rotation >= 360)
+                {
+                    if (flip) break;
+                    flip = true;
+                    rotation = 0;
+                }
+            }
+
+            return match;
+        }
+
+        private static List<Tile> GetRowRight(List<Tile> allTiles, Tile[] corners)
+        {
+            var row = new List<Tile>();
+            Tile next = corners.First();
+            while (next != null)
+            {
+                row.Add(next);
+                allTiles.Remove(next);
+                next = GetMatchRight(allTiles, row.Last());
+            }
+            return row;
+        }
+
+        private static Tile GetMatchRight(List<Tile> allTiles, Tile last)
+        {
+            Tile match = null;
+
+            int rotation = 0;
+            bool flip = false;
+
+            while (match == null)
+            {
+                match = allTiles.SingleOrDefault(x => x.GetTransformedLeft(rotation, flip) == last.Right);
+                if (match != null)
+                {
+                    match.Rotate = rotation;
+                    match.Flip = flip;
+                    break;
+                }
+                rotation += 90;
+                if (rotation >= 360) 
+                {
+                    if (flip) break;
+                    flip = true;
+                    rotation = 0;
+                }
+            }
+
+            return match;
         }
 
         private static List<Tile> CreateTiles()
@@ -18,7 +122,7 @@ namespace Day20
             var currentTile = new Tile();
             var allTiles = new List<Tile>();
 
-            foreach (var line in _input.Split(Environment.NewLine))
+            foreach (var line in _example.Split(Environment.NewLine))
             {
                 if (string.IsNullOrEmpty(line))
                 {
@@ -27,7 +131,18 @@ namespace Day20
 
                 if (line.StartsWith("Tile"))
                 {
-                    if (currentTile.Id > 0) allTiles.Add(currentTile);
+                    if (currentTile.Id > 0)
+                    {
+                        currentTile.Internal.Remove(currentTile.Internal.First());
+                        currentTile.Internal.Remove(currentTile.Internal.Last());
+                        var internalLength = currentTile.Internal[0].Length - 2;
+                        for (var i = 0; i < currentTile.Internal.Count(); i++)
+                        {
+                            currentTile.Internal[i] = currentTile.Internal[i].Substring(1, internalLength);
+                        }
+
+                        allTiles.Add(currentTile);
+                    }
                     currentTile = new Tile { Id = long.Parse(line.Substring(4, line.Length - 5)) };
                     continue;
                 }
@@ -37,6 +152,7 @@ namespace Day20
                     currentTile.Top = line;
                 }
 
+                currentTile.Internal.Add(line);
                 currentTile.Left += line[0];
                 currentTile.Right += line.Last();
 
@@ -71,6 +187,10 @@ namespace Day20
             public string Bottom { get; set; }
             public string Left { get; set; } = string.Empty;
             public string Right { get; set; } = string.Empty;
+            public bool Flip { get; set; }
+            public int Rotate { get; set; }
+
+            public List<string> Internal { get; set; } = new List<string>();
 
             public bool IsMatch(string otherSide)
             {
@@ -79,6 +199,72 @@ namespace Day20
                 var reverseOtherSide = string.Concat(otherSide.Reverse());
                 if (sides.Any(x => x.Equals(reverseOtherSide))) return true;
                 return false;
+            }
+
+            internal string GetMatchBottom()
+            {
+                var result = Bottom;
+                switch (Rotate)
+                {
+                    case 90:
+                        result = string.Concat(Right.Reverse());
+                        break;
+                    case 180:
+                        result = string.Concat(Top.Reverse());
+                        break;
+                    case 270:
+                        result = Left;
+                        break;
+                }
+
+                if (Flip)
+                    result = string.Concat(result.Reverse());
+
+                return result;
+            }
+
+            internal string GetTransformedLeft(int rotation, bool flip)
+            {
+                var result = Left;
+                switch(rotation)
+                {
+                    case 90:
+                        result = Bottom;
+                        break;
+                    case 180:
+                        result = string.Concat(Right.Reverse());
+                        break;
+                    case 270:
+                        result = string.Concat(Top.Reverse());
+                        break;
+                }
+
+                if (flip)
+                    result = string.Concat(result.Reverse());
+
+                return result;
+            }
+
+            internal string GetTransformedTop(int rotation, bool flip)
+            {
+                var result = Top;
+                switch (rotation)
+                {
+                    case 90:
+                        result = string.Concat(Left.Reverse());
+                        break;
+                    case 180:
+                        result = string.Concat(Bottom.Reverse());
+                        break;
+                    case 270:
+                        result = Right;
+                        break;
+                }
+
+                if (flip)
+                    result = string.Concat(result.Reverse());
+
+                return result;
             }
         }
 
