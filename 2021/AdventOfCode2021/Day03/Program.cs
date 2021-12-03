@@ -8,11 +8,13 @@ namespace Day03
         static void Main(string[] args)
         {
             var partOneAnswer = PartOne(input);
+            var partTwoAnswer = PartTwo(input);
 
             Console.WriteLine($"Part One: {partOneAnswer}");
+            Console.WriteLine($"Part Two: {partTwoAnswer}");
         }
 
-        private static object PartOne(string example)
+        private static int PartOne(string example)
         {
             var arrays = example.Split(Environment.NewLine).Select(x => x.ToList().Select(y => int.Parse(y.ToString())).ToArray());
 
@@ -31,13 +33,62 @@ namespace Day03
                     gammaAsString += "0";
                 }
                 else
-                { 
+                {
                     epsilonAsString += "0";
                     gammaAsString += "1";
                 }
             }
 
             return Convert.ToInt32(epsilonAsString, 2) * Convert.ToInt32(gammaAsString, 2);
+        }
+
+        private static int PartTwo(string example)
+        {
+            var arrays = example.Split(Environment.NewLine).Select(x => x.ToList().Select(y => int.Parse(y.ToString())).ToArray()).ToArray();
+
+            var length = arrays.First().Length;
+            var totalRows = arrays.Count();
+
+            var filter = arrays.Select(x => x).ToArray();
+            var position = 0;
+
+            while (filter.Count() > 1)
+            {
+                var sum = filter.Sum(a => a[position]);
+                if (sum >= filter.Length / 2.0)
+                {
+                    filter = filter.Where(x => x[position] == 1).ToArray();
+                }
+                else
+                {
+                    filter = filter.Where(x => x[position] == 0).ToArray();
+                }
+
+                position++;
+            }
+
+            var oxygen = string.Join(null, filter.Single().Select(x => x.ToString()));
+
+            filter = arrays.Select(x => x).ToArray();
+            position = 0;
+            while (filter.Count() > 1)
+            {
+                var sum = filter.Sum(a => a[position]);
+                if (sum >= filter.Length / 2.0)
+                {
+                    filter = filter.Where(x => x[position] == 0).ToArray();
+                }
+                else
+                {
+                    filter = filter.Where(x => x[position] == 1).ToArray();
+                }
+
+                position++;
+            }
+
+            var co2Scrubber = string.Join(null, filter.Single().Select(x => x.ToString()));
+
+            return Convert.ToInt32(oxygen, 2) * Convert.ToInt32(co2Scrubber, 2);
         }
 
         private static string example = @"00100
