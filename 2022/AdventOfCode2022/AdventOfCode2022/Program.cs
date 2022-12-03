@@ -15,7 +15,7 @@
 
             Console.WriteLine("Which puzzle part?");
             var puzzlePartString = Console.ReadLine();
-            if (!int.TryParse(dayString, out var puzzlePart))
+            if (!int.TryParse(puzzlePartString, out var puzzlePart))
             {
                 Console.WriteLine("Not a valid puzzle part.");
                 return;

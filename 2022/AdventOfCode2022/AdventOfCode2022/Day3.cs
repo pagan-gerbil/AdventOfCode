@@ -17,6 +17,22 @@ namespace AdventOfCode2022
         private static void Puzzle1()
         {
             var lines = _input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+            var total = 0;
+
+            foreach (var line in lines)
+            {
+                var part1 = line.Take(line.Length / 2).Distinct();
+                var part2 = line.Skip(line.Length / 2).Distinct();
+
+                var answer = part1.First(x => part2.Contains(x));
+
+                var score = char.IsUpper(answer) ? (int)answer - 38 : (int)answer - 96;
+                Console.WriteLine($"{answer}\t{char.IsUpper(answer)}\t{score}");
+                total += score;
+            }
+
+            Console.WriteLine($"The final score is {total}");
         }
 
         private static void Puzzle2()
