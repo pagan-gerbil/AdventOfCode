@@ -29,6 +29,7 @@
             switch(day)
             {
                 case 1: Day1.Run(puzzlePart); return;
+                case 2: Day2.Run(puzzlePart); return;
                 default: throw new NotImplementedException();
             }
         }
