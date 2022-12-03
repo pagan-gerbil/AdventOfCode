@@ -10,7 +10,8 @@ namespace AdventOfCode2022
     {
         public static void Run(int puzzlePart)
         {
-            Puzzle1();
+            if (puzzlePart == 1) Puzzle1();
+            if (puzzlePart == 2) Puzzle2();
         }
 
         private static void Puzzle1()
@@ -48,6 +49,43 @@ namespace AdventOfCode2022
             }
 
             Console.WriteLine($"The total score is {totalScore}");
+        }
+
+        private static void Puzzle2()
+        {
+            var lines = _input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var totalScore = 0;
+            foreach (var line in lines)
+            {
+                var player1 = 0;
+                var player2 = 0;
+                switch (line[0])
+                {
+                    case 'A': player1 = 1; break;
+                    case 'B': player1 = 2; break;
+                    case 'C': player1 = 3; break;
+                }
+
+                switch (line[2])
+                {
+                    case 'X': player2 = player1 == 1 ? 3 : player1 - 1; break;
+                    case 'Y': player2 = player1; break;
+                    case 'Z': player2 = player1 == 3 ? 1 : player1 + 1; break;
+                }
+
+                var score = player2;
+
+                if (player1 + 1 == player2 || player1 == 3 && player2 == 1) score += 6;
+                if (player1 == player2) score += 3;
+
+                var modifier = score > 6 ? "Win!" : score > 3 ? "Draw" : "Loss";
+
+                totalScore += score;
+
+                Console.WriteLine($"{line}: {modifier} - {score} - total: {totalScore}");
+            }
+
+            Console.WriteLine($"The total score is {totalScore}");            
         }
 
         private static string _testInput = @"A Y
