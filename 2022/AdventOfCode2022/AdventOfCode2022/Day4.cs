@@ -17,6 +17,22 @@ namespace AdventOfCode2022
         private static void Puzzle1()
         {
             var lines = _input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+            var total = 0;
+
+            foreach(var line in lines)
+            {
+                var pairs = line.Split(',');
+                var numbers1 = pairs[0].Split('-').Select(int.Parse);
+                var numbers2 = pairs[1].Split('-').Select(int.Parse);
+
+                if ((numbers1.Min() <= numbers2.Min() && numbers1.Max() >= numbers2.Max()) || (numbers1.Min() >= numbers2.Min() && numbers1.Max() <= numbers2.Max()))
+                {
+                    total++;
+                }
+            }
+
+            Console.WriteLine($"The final total is: {total}");
         }
 
         private static void Puzzle2()
