@@ -38,6 +38,25 @@ namespace AdventOfCode2022
         private static void Puzzle2()
         {
             var lines = _input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+            var total = 0;
+
+            foreach (var line in lines)
+            {
+                var pairs = line.Split(',');
+                var numbers1 = pairs[0].Split('-').Select(int.Parse).ToArray();
+                var numbers2 = pairs[1].Split('-').Select(int.Parse).ToArray();
+
+                if ((numbers1[0] >= numbers2.Min() && numbers1[0] <= numbers2.Max())|| (numbers1[1] >= numbers2.Min() && numbers1[1] <= numbers2.Max())
+                    ||
+                    (numbers2[0] >= numbers1.Min() && numbers2[0] <= numbers1.Max()) || (numbers2[1] >= numbers1.Min() && numbers2[1] <= numbers1.Max()))
+                {
+                    Console.WriteLine($"Overlap in {line}");
+                    total++;
+                }
+            }
+
+            Console.WriteLine($"The final total is: {total}");
         }
 
         private static string _testInput = @"2-4,6-8
