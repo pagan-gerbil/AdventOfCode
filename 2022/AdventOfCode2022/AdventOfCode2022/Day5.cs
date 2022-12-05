@@ -14,10 +14,10 @@ namespace AdventOfCode2022
         public static void Run(int puzzlePart)
         {
             if (puzzlePart == 1) Puzzle1();
-            if (puzzlePart == 2) Puzzle2();
+            if (puzzlePart == 2) Puzzle1(true);
         }
 
-        private static void Puzzle1()
+        private static void Puzzle1(bool multipleCratesMoved = false)
         {
             var sections = _input.Split(Environment.NewLine + Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             var startingCrates = sections[0].Split(Environment.NewLine).Reverse();
@@ -48,10 +48,22 @@ namespace AdventOfCode2022
                 var source = int.Parse(match.Groups["source"].Value) - 1;
                 var destination = int.Parse(match.Groups["destination"].Value) - 1;
 
-                for (var i = 1; i <= iterations; i++)
+                if (!multipleCratesMoved)
                 {
-                    var crate = crates[source].Pop();
-                    crates[destination].Push(crate);
+                    for (var i = 1; i <= iterations; i++)
+                    {
+                        var crate = crates[source].Pop();
+                        crates[destination].Push(crate);
+                    }
+                }
+                else
+                {
+                    var moved = new Stack<char>();
+                    for (var i = 1; i <= iterations; i++)
+                    {
+                        moved.Push(crates[source].Pop());
+                    }
+                    while (moved.Count > 0) crates[destination].Push(moved.Pop());
                 }
             }
 
@@ -62,15 +74,6 @@ namespace AdventOfCode2022
             }
 
             Console.WriteLine($"The final result is {result.ToString()}");
-        }
-
-        private static void Puzzle2()
-        {
-            var lines = _input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-
-            var total = 0;
-
-            Console.WriteLine($"The final total is: {total}");
         }
 
         private static string _testInput = @"    [D]    
