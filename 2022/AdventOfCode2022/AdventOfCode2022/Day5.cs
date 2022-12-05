@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AdventOfCode2022
 {
     internal class Day5
     {
+        private static Regex _instructionRegex = new Regex("move (?<iterations>[0-9]+) from (?<source>[0-9]) to (?<destination>[0-9])");
+
         public static void Run(int puzzlePart)
         {
             if (puzzlePart == 1) Puzzle1();
@@ -16,11 +19,49 @@ namespace AdventOfCode2022
 
         private static void Puzzle1()
         {
-            var lines = _input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var sections = _input.Split(Environment.NewLine + Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var startingCrates = sections[0].Split(Environment.NewLine).Reverse();
+            var instructions = sections[1].Split(Environment.NewLine);
 
-            var total = 0;
+            var crates = new Stack<char>[int.Parse(startingCrates.First().Trim().Last().ToString())];
+            for (var i = 0; i < crates.Length; i++)
+            {
+                crates[i] = new Stack<char>();
+            }
 
-            Console.WriteLine($"The final total is: {total}");
+            foreach (var crateLine in startingCrates.Skip(1))
+            {
+                var index = 1;
+                var stackIndex = 0;
+                while (index < crateLine.Length)
+                {
+                    if (char.IsLetter(crateLine[index])) crates[stackIndex].Push(crateLine[index]);
+                    index += 4;
+                    stackIndex++;
+                }
+            }
+
+            foreach (var instruction in instructions)
+            {
+                var match = _instructionRegex.Match(instruction);
+                var iterations = int.Parse(match.Groups["iterations"].Value);
+                var source = int.Parse(match.Groups["source"].Value) - 1;
+                var destination = int.Parse(match.Groups["destination"].Value) - 1;
+
+                for (var i = 1; i <= iterations; i++)
+                {
+                    var crate = crates[source].Pop();
+                    crates[destination].Push(crate);
+                }
+            }
+
+            var result = new StringBuilder();
+            foreach(var crateStack in crates)
+            {
+                result.Append(crateStack.Peek());
+            }
+
+            Console.WriteLine($"The final result is {result.ToString()}");
         }
 
         private static void Puzzle2()
