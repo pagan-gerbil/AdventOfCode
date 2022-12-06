@@ -16,12 +16,27 @@ namespace AdventOfCode2022
 
         private static void Puzzle1()
         {
-            var lines = _input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var solved = false;
+            var i = 0;
+            var answer = string.Empty;
+            while (!solved)
+            {
+                var chars = _input.Skip(i).Take(4).ToArray();
+                if (chars.Distinct().Count() == 4)
+                {
+                    answer = new string(chars, 0, 4);
+                    solved = true;
+                    break;
+                }
+
+                i++;
+            }
+
+            Console.WriteLine($"The answer is {i + 4} ({answer})");
         }
 
         private static void Puzzle2()
         {
-            var lines = _input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
         }
 
         private static string _testInput = @"mjqjpqmgbljsphdztnvjfqwrcgsmlb";
