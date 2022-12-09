@@ -34,6 +34,9 @@
                 case 4: Day4.Run(puzzlePart); return;
                 case 5: Day5.Run(puzzlePart); return;
                 case 6: Day6.Run(puzzlePart); return;
+                case 7: Day7.Run(puzzlePart); return;
+                case 8: Day8.Run(puzzlePart); return;
+                case 9: Day9.Run(puzzlePart); return;
                 default: throw new NotImplementedException();
             }
         }
