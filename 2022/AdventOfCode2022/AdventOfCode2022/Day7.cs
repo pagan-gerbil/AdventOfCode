@@ -53,10 +53,6 @@ namespace AdventOfCode2022
                 }
             }
 
-            dirs.Remove("/");
-
-            
-
             foreach (var key in dirs.Keys.OrderByDescending(x => x.Length))
             {
                 foreach (var subDir in dirs[key])
@@ -72,6 +68,63 @@ namespace AdventOfCode2022
 
         private static void Puzzle2()
         {
+            Dictionary<string, List<string>> dirs = new Dictionary<string, List<string>>();
+            Dictionary<string, long> files = new Dictionary<string, long>();
+            var currentDir = new Stack<string>();
+            var path = string.Empty;
+            foreach (var line in _input.Split(Environment.NewLine))
+            {
+                if (line.StartsWith("$ cd "))
+                {
+                    var thisDir = line.Substring(5);
+
+                    if (thisDir == "..")
+                    {
+                        currentDir.Pop();
+                        path = currentDir.Peek();
+                        continue;
+                    }
+
+                    path += $"/{thisDir}";
+
+                    currentDir.Push(path);
+                    dirs.Add(path, new List<string>());
+                    files.Add(path, 0);
+                    continue;
+                }
+
+                if (line.StartsWith("dir"))
+                {
+                    dirs[currentDir.Peek()].Add($"{path}/{line.Substring(4)}");
+                }
+
+                if (char.IsNumber(line.First()))
+                {
+                    var size = long.Parse(line.Substring(0, line.IndexOf(" ")));
+                    files[currentDir.Peek()] += size;
+                }
+            }
+
+            foreach (var key in dirs.Keys.OrderByDescending(x => x.Length))
+            {
+                foreach (var subDir in dirs[key])
+                {
+                    files[key] += files[subDir];
+                }
+            }
+
+            var usedSpace = files["//"];
+
+            Console.WriteLine($"Used space: {usedSpace}");
+            Console.WriteLine($"Unused space: {70000000 - usedSpace}");
+            var targetUnused = 30000000;
+            var shortfall = targetUnused - (70000000 - usedSpace);
+
+            Console.WriteLine($"To delete: {shortfall}");
+
+            var answer = files.Where(x => x.Value > shortfall).Min(x => x.Value);
+            Console.WriteLine($"The answer is {answer}");
+
         }
 
         private static string _testInput = @"$ cd /
