@@ -68,6 +68,85 @@ namespace AdventOfCode2022
 
         private static void Puzzle2()
         {
+            var grid = _input.Replace(Environment.NewLine, string.Empty);
+
+            var size = (int)Math.Sqrt(grid.Length);
+
+            Console.WriteLine($"Total length {grid.Length}, side length {size}");
+
+            var highestScore = 0;
+
+            for(var i = 0; i < grid.Length; i++)
+            {
+                var scenicScore = 1;
+
+                // LEFT
+                if ((i > 0 && (i - 1) % size != 0) || (i < size && i > 0))
+                {
+                    var minLeftLimit = (i / size) * size;
+                    var leftScore = 0;
+                    for (var ii = i - 1; ii >= minLeftLimit; ii--)
+                    {
+                        leftScore++;
+                        if (grid[ii] >= grid[i])
+                        {
+                            break;
+                        }
+                    }
+                    scenicScore *= leftScore;
+                }
+
+                // TOP
+                if (i > size)
+                {
+                    var topScore = 0;
+                    for (var ii = i - size; ii >= 0; ii -= size)
+                    {
+                        topScore++;
+                        if (grid[ii] >= grid[i])
+                        {
+                            break;
+                        }
+                    }
+                    scenicScore *= topScore;
+                }
+
+                // RIGHT
+                if (i % size != 0 || i == 0)
+                {
+                    var maxLimit = i + (size - (i % size));
+                    var rightScore = 0;
+                    for (var ii = i + 1; ii < maxLimit; ii++)
+                    {
+                        rightScore++;
+                        if (grid[ii] >= grid[i])
+                        {
+                            break;
+                        }
+                    }
+                    scenicScore *= rightScore;                   
+                }
+
+                // BOTTOM
+                if (grid.Length - size > i)
+                {
+                    var bottomScore = 0;
+                    for (var ii = i + size; ii < grid.Length; ii += size)
+                    {
+                        bottomScore++;
+                        if (grid[ii] >= grid[i])
+                        {
+                            break;
+                        }
+                    }
+                    scenicScore *= bottomScore;
+                }
+
+                // TOTAL
+                if (scenicScore > highestScore) highestScore = scenicScore;
+            }
+
+            Console.WriteLine($"The highest possible scenic score is {highestScore}");
         }
 
         private static string _testInput = @"30373
