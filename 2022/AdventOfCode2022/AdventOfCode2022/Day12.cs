@@ -24,22 +24,14 @@ namespace AdventOfCode2022
 
             var process = rawInput.Replace(Environment.NewLine, string.Empty);
 
-            var currentIndex = process.IndexOf('S');
-            var targetIndex = process.IndexOf('E');
+            var currentIndex = process.IndexOf('E');
+            var targetIndex = process.IndexOf('S');
 
             process = process.Replace('S', 'a').Replace('E', 'z');
 
             var thisPath = new List<int>();
 
-            var deadEndPaths = new List<int[]>();
-
-            //var map = new Dictionary<int, List<int>>();
-            //for (var i = 0; i < process.Length; i++)
-            //{
-            //    map.Add(i, GetPossibleSteps(colCount, process, i, targetIndex, thisPath, deadEndPaths).ToList());
-            //}
-
-            //RemoveCulDeSacs(currentIndex, targetIndex, map);
+            var deadEndPaths = new Dictionary<int, List<int[]>>();
 
             thisPath.Add(currentIndex);
             while (currentIndex != targetIndex)
@@ -48,14 +40,18 @@ namespace AdventOfCode2022
 
                 if (!possibleSteps.Any())
                 {
-                    if (deadEndPaths.Any(x => x.SequenceEqual(thisPath.AsEnumerable().Reverse())))
+                    if (deadEndPaths.ContainsKey(currentIndex) && deadEndPaths[currentIndex].Any(x => x.SequenceEqual(thisPath.AsEnumerable().Reverse())))
                     {
                         Console.WriteLine("DUPLICATE DEAD END REACHED");
                         break;
                     }
-                    deadEndPaths.Add(thisPath.AsEnumerable().Reverse().ToArray());
+                    if (!deadEndPaths.ContainsKey(currentIndex))
+                    {
+                        deadEndPaths.Add(currentIndex, new List<int[]>());
+                    }
+                    deadEndPaths[currentIndex].Add(thisPath.AsEnumerable().Reverse().ToArray());
 
-                    Console.WriteLine($"Dead-end reached: {currentIndex}, length: {thisPath.Count}");
+                    Console.WriteLine($"Dead-end reached: {currentIndex}\t  length: {thisPath.Count}\t  endpoint: [ {process[currentIndex]} ]");
                     while (GetPossibleSteps(colCount, process, thisPath.Last(), targetIndex, thisPath, deadEndPaths).Count() < 1)
                     {
                         var badIndex = currentIndex;
@@ -73,38 +69,25 @@ namespace AdventOfCode2022
             Console.WriteLine($"Number of steps taken: {thisPath.Count - 1}");
         }
 
-        private static void RemoveCulDeSacs(int currentIndex, int targetIndex, Dictionary<int, List<int>> map)
-        {
-            var removed = 1;
-            while (removed > 0)
-            {
-                removed = 0;
-
-                foreach (var i in map.Keys)
-                {
-                    if (map[i].Count == 1 && i != currentIndex && i != targetIndex)
-                    {
-                        var source = map[i].Single();
-                        map[source].Remove(i);
-                        map[i].Remove(source);
-                        removed++;
-                    }
-                }
-                Console.WriteLine($"Removed {removed} cul-de-sacs");
-            }
-        }
-
-        private static IEnumerable<int> GetPossibleSteps(int colCount, string process, int currentIndex, int targetIndex, List<int> thisPath, List<int[]> deadEndPaths, Dictionary<int, List<int>> map = null)
+        private static IEnumerable<int> GetPossibleSteps(int colCount, string process, int currentIndex, int targetIndex, List<int> thisPath, Dictionary<int,List<int[]>> deadEndPaths)
         {
             var possibleSteps = GetAllSteps(process, colCount, currentIndex).ToArray();
 
-            ; possibleSteps = possibleSteps
-                ; possibleSteps = possibleSteps.Where(x => Math.Abs(process[x] - process[currentIndex]) <= 1 && !thisPath.Contains(x)).ToArray() // not too high or low; not visited before
-                ; possibleSteps = possibleSteps.Where(x => !deadEndPaths.Any(y => y.SequenceEqual(thisPath.AsEnumerable().Union(new[] { x }).Reverse()))).ToArray() // not visiting a dead end
-                ; possibleSteps = possibleSteps.Where(x => map == null || map[currentIndex].Contains(x))
-                .OrderBy(x => process[x]).ThenBy(x => Math.Abs(targetIndex - x))
+            var result = possibleSteps
+                .Where(x => Math.Abs(process[x] - process[currentIndex]) <= 1 && !thisPath.Contains(x)) // not too high or low; not visited before
+                .Where(x => process[x] - process[currentIndex] <= 0) // head down
+                .Where(x => !deadEndPaths.ContainsKey(x))// || !deadEndPaths[x].Any(y => y.SequenceEqual(thisPath.AsEnumerable().Union(new[] { x }).Reverse()))) // not visiting a dead end
+                .OrderBy(x => deadEndPaths.ContainsKey(x) ? deadEndPaths[x].Count : 0).ThenByDescending(x => process[x]).ThenBy(x => Math.Abs(targetIndex - x))
                 .ToArray();
-            return possibleSteps;
+
+            if (result.Length > 0) return result;
+
+            return possibleSteps
+                .Where(x => Math.Abs(process[x] - process[currentIndex]) <= 1 && !thisPath.Contains(x)) // not too high or low; not visited before
+                .Where(x => process[x] - process[currentIndex] <= 0) // head down
+                .Where(x => !deadEndPaths.ContainsKey(x) || !deadEndPaths[x].Any(y => y.SequenceEqual(thisPath.AsEnumerable().Union(new[] { x }).Reverse()))) // not visiting a dead end
+                .OrderBy(x => deadEndPaths.ContainsKey(x) ? deadEndPaths[x].Count : 0).ThenByDescending(x => process[x]).ThenBy(x => Math.Abs(targetIndex - x))
+                .ToArray(); ;
         }
 
         private static IEnumerable<int> GetAllSteps(string process, int colCount, int currentIndex)
