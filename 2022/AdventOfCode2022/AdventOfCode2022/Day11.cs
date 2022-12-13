@@ -79,10 +79,6 @@ namespace AdventOfCode2022
             Console.WriteLine($"After {numberOfRounds} rounds, the two most annoying monkeys score: {totalScore}");
         }
 
-        private static void Puzzle2()
-        {
-        }
-
         private static string _testInput = @"Monkey 0:
   Starting items: 79, 98
   Operation: new = old * 19
