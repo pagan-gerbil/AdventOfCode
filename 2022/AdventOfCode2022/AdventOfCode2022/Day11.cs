@@ -44,14 +44,14 @@ namespace AdventOfCode2022
 
             var monkeyTests = new[]
             {
-                new Func<int, int>((int input) => input % 17 == 0 ? 2 : 7),
-                new Func<int, int>((int input) => input % 19 == 0 ? 7 : 0),
-                new Func<int, int>((int input) => input % 7 == 0 ? 4 : 3),
-                new Func<int, int>((int input) => input % 11 == 0 ? 6 : 4),
-                new Func<int, int>((int input) => input % 13 == 0 ? 6 : 5),
-                new Func<int, int>((int input) => input % 3 == 0 ? 1 : 0),
-                new Func<int, int>((int input) => input % 5 == 0 ? 5 : 1),
-                new Func<int, int>((int input) => input % 2 == 0 ? 2 : 3),
+                new Func<long, int>((long input) => input % 17 == 0 ? 2 : 7),
+                new Func<long, int>((long input) => input % 19 == 0 ? 7 : 0),
+                new Func<long, int>((long input) => input % 7 == 0 ? 4 : 3),
+                new Func<long, int>((long input) => input % 11 == 0 ? 6 : 4),
+                new Func<long, int>((long input) => input % 13 == 0 ? 6 : 5),
+                new Func<long, int>((long input) => input % 3 == 0 ? 1 : 0),
+                new Func<long, int>((long input) => input % 5 == 0 ? 5 : 1),
+                new Func<long, int>((long input) => input % 2 == 0 ? 2 : 3),
             };
 
 
