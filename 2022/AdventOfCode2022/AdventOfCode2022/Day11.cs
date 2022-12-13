@@ -66,7 +66,15 @@ namespace AdventOfCode2022
                         var currentItem = monkeyItems[monkeyNumber].Dequeue();
                         currentItem = monkeyOps[monkeyNumber](currentItem);
                         monkeyScores[monkeyNumber]++;
-                        currentItem /= worryReducer;
+
+                        if (worryReducer > 1)
+                        {
+                            currentItem /= worryReducer;
+                        }
+                        else
+                        {
+                            currentItem = currentItem % 9699690;
+                        }
                         var newMonkey = monkeyTests[monkeyNumber](currentItem);
                         monkeyItems[newMonkey].Enqueue(currentItem);
                     }
