@@ -12,34 +12,34 @@ namespace AdventOfCode2022
     {
         public static void Run(int puzzlePart)
         {
-            if (puzzlePart == 1) Puzzle1();
-            if (puzzlePart == 2) Puzzle2();
+            if (puzzlePart == 1) Puzzle(3, 20);
+            if (puzzlePart == 2) Puzzle(1, 10000);
         }
 
-        private static void Puzzle1()
+        private static void Puzzle(int worryReducer, int numberOfRounds)
         {
             var monkeyItems = new[]
             {
-                new Queue<int>(new[] {83, 97, 95, 67}),
-                new Queue<int>(new[] {71, 70, 79, 88, 56, 70}),
-                new Queue<int>(new[] {98, 51, 51, 63, 80, 85, 84, 95}),
-                new Queue<int>(new[] {77, 90, 82, 80, 79}),
-                new Queue<int>(new[] {68}),
-                new Queue<int>(new[] {60,94}),
-                new Queue<int>(new[] {81, 51, 85}),
-                new Queue<int>(new[] {98, 81, 63, 65, 84, 71, 84}),
+                new Queue<long>(new long[] {83, 97, 95, 67}),
+                new Queue<long>(new long[] {71, 70, 79, 88, 56, 70}),
+                new Queue<long>(new long[] {98, 51, 51, 63, 80, 85, 84, 95}),
+                new Queue<long>(new long[] {77, 90, 82, 80, 79}),
+                new Queue<long>(new long[] {68}),
+                new Queue<long>(new long[] {60, 94}),
+                new Queue<long>(new long[] {81, 51, 85}),
+                new Queue<long>(new long[] {98, 81, 63, 65, 84, 71, 84}),
             };
 
             var monkeyOps = new[]
             {
-                new Func<int,int>((int old) => old*19),
-                new Func<int,int>((int old) => old+2),
-                new Func<int,int>((int old) => old+7),
-                new Func<int,int>((int old) => old+1),
-                new Func<int,int>((int old) => old*5),
-                new Func<int,int>((int old) => old+5),
-                new Func<int,int>((int old) => old*old),
-                new Func<int,int>((int old) => old+3),
+                new Func<long,long>((long old) => old*19),
+                new Func<long,long>((long old) => old+2),
+                new Func<long,long>((long old) => old+7),
+                new Func<long,long>((long old) => old+1),
+                new Func<long,long>((long old) => old*5),
+                new Func<long,long>((long old) => old+5),
+                new Func<long,long>((long old) => old*old),
+                new Func<long,long>((long old) => old+3),
             };
 
             var monkeyTests = new[]
@@ -54,9 +54,10 @@ namespace AdventOfCode2022
                 new Func<int, int>((int input) => input % 2 == 0 ? 2 : 3),
             };
 
-            var monkeyScores = monkeyItems.Select(x => 0).ToArray();
 
-            for (var roundNumber = 1; roundNumber <= 20; roundNumber++)
+            var monkeyScores = monkeyItems.Select(x => 0l).ToArray();
+
+            for (var roundNumber = 1; roundNumber <= numberOfRounds; roundNumber++)
             {
                 for (var monkeyNumber = 0; monkeyNumber < monkeyItems.Length; monkeyNumber++)
                 {
@@ -65,7 +66,7 @@ namespace AdventOfCode2022
                         var currentItem = monkeyItems[monkeyNumber].Dequeue();
                         currentItem = monkeyOps[monkeyNumber](currentItem);
                         monkeyScores[monkeyNumber]++;
-                        currentItem /= 3;
+                        currentItem /= worryReducer;
                         var newMonkey = monkeyTests[monkeyNumber](currentItem);
                         monkeyItems[newMonkey].Enqueue(currentItem);
                     }
@@ -75,7 +76,7 @@ namespace AdventOfCode2022
             var top2 = monkeyScores.OrderByDescending(x=>x).Take(2);
             var totalScore = top2.First() * top2.Last();
 
-            Console.WriteLine($"After 20 rounds, the two most annoying monkeys score: {totalScore}");
+            Console.WriteLine($"After {numberOfRounds} rounds, the two most annoying monkeys score: {totalScore}");
         }
 
         private static void Puzzle2()
