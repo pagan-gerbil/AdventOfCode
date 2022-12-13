@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace AdventOfCode2022
 {
@@ -6,52 +7,8 @@ namespace AdventOfCode2022
     {
         public static void Run(int puzzlePart)
         {
-            if (puzzlePart == 1) Puzzle1();
-            if (puzzlePart == 2) Puzzle2();
-        }
-
-        private static void Puzzle1()
-        {
-            var visitedPositions = new List<(int, int)>();
-            var headPosition = (0, 0);
-            var tailPosition = (0, 0);
-
-            var mod = (0, 0);
-            foreach (var line in _input.Split(Environment.NewLine))
-            {
-                mod = GetDirection(mod, line);
-                var iterations = int.Parse(line.Substring(2));
-                for (var i = 0; i < iterations; i++)
-                {
-                    headPosition.Item1 += mod.Item1;
-                    headPosition.Item2 += mod.Item2;
-
-                    int diffX = headPosition.Item1 - tailPosition.Item1;
-                    int diffY = headPosition.Item2 - tailPosition.Item2;
-
-                    if ((Math.Abs(diffX) > 0 && Math.Abs(diffY) > 1) || (Math.Abs(diffX) > 1 && Math.Abs(diffY) > 0))
-                    {
-                        tailPosition.Item1 += diffX > 0 ? 1 : -1;
-                        tailPosition.Item2 += diffY > 0 ? 1 : -1;
-                    }
-                    else
-                    {
-                        if (Math.Abs(diffX) > 1)
-                        {
-                            tailPosition.Item1 += diffX > 0 ? 1 : -1;
-                        }
-
-                        if (Math.Abs(diffY) > 1)
-                        {
-                            tailPosition.Item2 += diffY > 0 ? 1 : -1;
-                        }
-                    }
-
-                    visitedPositions.Add((tailPosition.Item1, tailPosition.Item2));
-                }
-            }
-
-            Console.WriteLine($"The number of visited positions is {visitedPositions.Distinct().Count()}");
+            if (puzzlePart == 1) Puzzle(2);
+            if (puzzlePart == 2) Puzzle(10);
         }
 
         private static (int, int) GetDirection((int, int) mod, string line)
@@ -76,8 +33,55 @@ namespace AdventOfCode2022
             return mod;
         }
 
-        private static void Puzzle2()
+        private static void Puzzle(int numberOfKnots)
         {
+            var visitedPositions = new List<(int, int)>();
+            var knots = new (int, int)[numberOfKnots];
+
+            var mod = (0, 0);
+            foreach (var line in _input.Split(Environment.NewLine))
+            {
+                mod = GetDirection(mod, line);
+                var iterations = int.Parse(line.Substring(2));
+                for (var i = 0; i < iterations; i++)
+                {
+                    knots[0].Item1 += mod.Item1;
+                    knots[0].Item2 += mod.Item2;
+
+                    for (var knotIndex = 1; knotIndex < knots.Length; knotIndex++)
+                    {
+                        FollowKnot(knots, knotIndex);
+                    }
+
+                    visitedPositions.Add((knots.Last().Item1, knots.Last().Item2));
+                }
+            }
+
+            Console.WriteLine($"The number of visited positions is {visitedPositions.Distinct().Count()}");
+        }
+
+        private static void FollowKnot((int, int)[] knots, int currentKnot)
+        {
+            int diffX = knots[currentKnot - 1].Item1 - knots[currentKnot].Item1;
+            int diffY = knots[currentKnot - 1].Item2 - knots[currentKnot].Item2;
+
+            if ((Math.Abs(diffX) > 0 && Math.Abs(diffY) > 1) || (Math.Abs(diffX) > 1 && Math.Abs(diffY) > 0))
+            {
+                knots[currentKnot].Item1 += diffX > 0 ? 1 : -1;
+                knots[currentKnot].Item2 += diffY > 0 ? 1 : -1;
+            }
+            else
+            {
+                if (Math.Abs(diffX) > 1)
+                {
+                    knots[currentKnot].Item1 += diffX > 0 ? 1 : -1;
+                }
+
+                if (Math.Abs(diffY) > 1)
+                {
+                    knots[currentKnot].Item2 += diffY > 0 ? 1 : -1;
+                }
+            }
         }
 
         private static string _testInput = @"R 4
