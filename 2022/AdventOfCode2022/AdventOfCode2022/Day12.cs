@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,100 +17,158 @@ namespace AdventOfCode2022
 
         private static void Puzzle1()
         {
-            var rawInput = _input;
-            var grid = rawInput.Split(Environment.NewLine).Select(x => x.ToCharArray()).ToArray();
+            // credit to https://www.koderdojo.com/blog/breadth-first-search-and-shortest-path-in-csharp-and-net-core for assisting with the search function
 
-            var rowCount = grid.Length;
-            var colCount = grid.First().Length;
+            var colCount = _input.IndexOf(Environment.NewLine);
+            var map = _input.Replace(Environment.NewLine, string.Empty);
 
-            var process = rawInput.Replace(Environment.NewLine, string.Empty);
+            var graph = new Graph<int>();
+            for (var i = 0; i < map.Length; i++) graph.AddVertex(i);
 
-            var currentIndex = process.IndexOf('E');
-            var targetIndex = process.IndexOf('S');
+            var startIndex = map.IndexOf('S');
+            var endIndex = map.IndexOf('E');
 
-            process = process.Replace('S', 'a').Replace('E', 'z');
+            map = map.Replace('S', 'a').Replace('E', 'z');
 
-            var thisPath = new List<int>();
-
-            var deadEndPaths = new Dictionary<int, List<int[]>>();
-
-            thisPath.Add(currentIndex);
-            while (currentIndex != targetIndex)
+            for (var i = 0; i < map.Length; i++)
             {
-                var possibleSteps = GetPossibleSteps(colCount, process, currentIndex, targetIndex, thisPath, deadEndPaths);//, map);
+                graph.AddVertex(i);
 
-                if (!possibleSteps.Any())
+                var c = map[i];
+
+                if (i % colCount != 0 && map[i - 1] <= c + 1) graph.AddEdge(new (i, i - 1));
+                if ((i - 1) % colCount != 0 && i + 1 < map.Length && map[i + 1] <= c + 1) graph.AddEdge(new (i, i + 1));
+                if (i >= colCount && map[i - colCount] <= c + 1) graph.AddEdge(new (i, i - colCount));
+                if (i + colCount < map.Length && map[i + colCount] <= c + 1) graph.AddEdge(new (i, i + colCount));
+            }
+
+            var path = new List<int>();
+
+            var algorithms = new Algorithms();
+
+            var f = algorithms.ShortestPathFunction(graph, startIndex, (start, finish) => map[start] + 1 >= map[finish]);
+            var output = f(endIndex);
+
+            Console.WriteLine(string.Join(", ", output));
+            Console.WriteLine($"The shortest path is {output.Count()}");
+
+            DrawMap(map, output, colCount);
+        }
+
+        private static void DrawMap(string map, IEnumerable<int> output, int colCount)
+        {
+            for(var i = 0; i < map.Length; i++)
+            {
+                if (i > 0 && i % colCount == 0) Console.Write(Environment.NewLine);
+                if (output.Contains(i))
                 {
-                    if (deadEndPaths.ContainsKey(currentIndex) && deadEndPaths[currentIndex].Any(x => x.SequenceEqual(thisPath.AsEnumerable().Reverse())))
-                    {
-                        Console.WriteLine("DUPLICATE DEAD END REACHED");
-                        break;
-                    }
-                    if (!deadEndPaths.ContainsKey(currentIndex))
-                    {
-                        deadEndPaths.Add(currentIndex, new List<int[]>());
-                    }
-                    deadEndPaths[currentIndex].Add(thisPath.AsEnumerable().Reverse().ToArray());
-
-                    Console.WriteLine($"Dead-end reached: {currentIndex}\t  length: {thisPath.Count}\t  endpoint: [ {process[currentIndex]} ]");
-                    while (GetPossibleSteps(colCount, process, thisPath.Last(), targetIndex, thisPath, deadEndPaths).Count() < 1)
-                    {
-                        var badIndex = currentIndex;
-                        thisPath.Remove(badIndex);
-                        currentIndex = thisPath.Last();
-                    }
-                    continue;
+                    Console.ForegroundColor = ConsoleColor.Green;
                 }
 
-                currentIndex = possibleSteps.First();
-
-                thisPath.Add(currentIndex);
+                Console.Write(map[i]);
+                Console.ForegroundColor = ConsoleColor.White;
             }
-
-            Console.WriteLine($"Number of steps taken: {thisPath.Count - 1}");
         }
 
-        private static IEnumerable<int> GetPossibleSteps(int colCount, string process, int currentIndex, int targetIndex, List<int> thisPath, Dictionary<int,List<int[]>> deadEndPaths)
+        public class Graph<T> where T : notnull
         {
-            var possibleSteps = GetAllSteps(process, colCount, currentIndex).ToArray();
+            public Graph() { }
+            public Graph(IEnumerable<T> vertices, IEnumerable<Tuple<T, T>> edges)
+            {
+                foreach (var vertex in vertices) AddVertex(vertex);
 
-            var result = possibleSteps
-                .Where(x => Math.Abs(process[x] - process[currentIndex]) <= 1 && !thisPath.Contains(x)) // not too high or low; not visited before
-                .Where(x => process[x] - process[currentIndex] <= 0) // head down
-                .Where(x => !deadEndPaths.ContainsKey(x))// || !deadEndPaths[x].Any(y => y.SequenceEqual(thisPath.AsEnumerable().Union(new[] { x }).Reverse()))) // not visiting a dead end
-                .OrderBy(x => deadEndPaths.ContainsKey(x) ? deadEndPaths[x].Count : 0).ThenByDescending(x => process[x]).ThenBy(x => Math.Abs(targetIndex - x))
-                .ToArray();
+                foreach (var edge in edges) AddEdge(edge);
+            }
 
-            if (result.Length > 0) return result;
+            public Dictionary<T, HashSet<T>> AdjacencyList { get; } = new Dictionary<T, HashSet<T>>();
 
-            return possibleSteps
-                .Where(x => Math.Abs(process[x] - process[currentIndex]) <= 1 && !thisPath.Contains(x)) // not too high or low; not visited before
-                .Where(x => process[x] - process[currentIndex] <= 0) // head down
-                .Where(x => !deadEndPaths.ContainsKey(x) || !deadEndPaths[x].Any(y => y.SequenceEqual(thisPath.AsEnumerable().Union(new[] { x }).Reverse()))) // not visiting a dead end
-                .OrderBy(x => deadEndPaths.ContainsKey(x) ? deadEndPaths[x].Count : 0).ThenByDescending(x => process[x]).ThenBy(x => Math.Abs(targetIndex - x))
-                .ToArray(); ;
+            public void AddVertex(T vertex)
+            {
+                AdjacencyList[vertex] = new HashSet<T>();
+            }
+
+            public void AddEdge(Tuple<T, T> edge)
+            {
+                if (AdjacencyList.ContainsKey(edge.Item1) && AdjacencyList.ContainsKey(edge.Item2))
+                {
+                    AdjacencyList[edge.Item1].Add(edge.Item2);
+                    AdjacencyList[edge.Item2].Add(edge.Item1);
+                }
+            }
         }
 
-        private static IEnumerable<int> GetAllSteps(string process, int colCount, int currentIndex)
+        public class Algorithms
         {
-            if (currentIndex % colCount > 0)
+            public HashSet<T> BFS<T>(Graph<T> graph, T start, Action<T> preVisit = null) where T : notnull
             {
-                yield return currentIndex - 1;
+                var visited = new HashSet<T>();
+
+                if (!graph.AdjacencyList.ContainsKey(start))
+                    return visited;
+
+                var queue = new Queue<T>();
+                queue.Enqueue(start);
+
+                while (queue.Count > 0)
+                {
+                    var vertex = queue.Dequeue();
+
+                    if (visited.Contains(vertex))
+                        continue;
+
+                    if (preVisit != null)
+                        preVisit(vertex);
+
+                    visited.Add(vertex);
+
+                    foreach (var neighbor in graph.AdjacencyList[vertex])
+                        if (!visited.Contains(neighbor))
+                            queue.Enqueue(neighbor);
+                }
+
+                return visited;
             }
 
-            if ((currentIndex + 1) % colCount > 0)
+            public Func<T, IEnumerable<T>> ShortestPathFunction<T>(Graph<T> graph, T start, Func<T, T, bool> isValidFunc = null) where T : notnull
             {
-                yield return currentIndex + 1;
-            }
+                var previous = new Dictionary<T, T>();
 
-            if (currentIndex >= colCount)
-            {
-                yield return currentIndex - colCount;
-            }
+                var queue = new Queue<T>();
+                queue.Enqueue(start);
 
-            if (currentIndex + colCount < process.Length)
-            {
-                yield return currentIndex + colCount;
+                while (queue.Count > 0)
+                {
+                    var vertex = queue.Dequeue();
+                    foreach (var neighbor in graph.AdjacencyList[vertex])
+                    {
+                        if (previous.ContainsKey(neighbor))
+                            continue;
+
+                        if (isValidFunc != null && isValidFunc(vertex, neighbor))
+                        {
+                            previous[neighbor] = vertex;
+                            queue.Enqueue(neighbor);
+                        }
+                    }
+                }
+
+                Func<T, IEnumerable<T>> shortestPath = v => {
+                    var path = new List<T> { };
+
+                    var current = v;
+                    while (!current.Equals(start))
+                    {
+                        path.Add(current);
+                        current = previous[current];
+                    };
+
+                    path.Add(start);
+                    path.Reverse();
+
+                    return path;
+                };
+
+                return shortestPath;
             }
         }
 
