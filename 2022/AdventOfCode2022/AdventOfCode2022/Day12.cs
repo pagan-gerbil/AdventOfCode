@@ -153,6 +153,8 @@ namespace AdventOfCode2022
                 }
 
                 Func<T, IEnumerable<T>> shortestPath = v => {
+                    if (!previous.ContainsKey(v)) return null;
+
                     var path = new List<T> { };
 
                     var current = v;
@@ -174,6 +176,47 @@ namespace AdventOfCode2022
 
         private static void Puzzle2()
         {
+            var colCount = _input.IndexOf(Environment.NewLine);
+            var map = _input.Replace(Environment.NewLine, string.Empty);
+
+            var graph = new Graph<int>();
+            for (var i = 0; i < map.Length; i++) graph.AddVertex(i);
+
+            var endIndex = map.IndexOf('E');
+
+            map = map.Replace('S', 'a').Replace('E', 'z');
+
+            for (var i = 0; i < map.Length; i++)
+            {
+                graph.AddVertex(i);
+
+                var c = map[i];
+
+                if (i % colCount != 0 && map[i - 1] <= c + 1) graph.AddEdge(new(i, i - 1));
+                if ((i - 1) % colCount != 0 && i + 1 < map.Length && map[i + 1] <= c + 1) graph.AddEdge(new(i, i + 1));
+                if (i >= colCount && map[i - colCount] <= c + 1) graph.AddEdge(new(i, i - colCount));
+                if (i + colCount < map.Length && map[i + colCount] <= c + 1) graph.AddEdge(new(i, i + colCount));
+            }
+
+            var lowestPath = new List<int>();
+
+            var algorithms = new Algorithms();
+            var startIndexes = map.Select((x, i) => x == 'a' ? i : -1).Where(x => x >= 0);
+
+            foreach (var startIndex in startIndexes)
+            {
+                var f = algorithms.ShortestPathFunction(graph, startIndex, (start, finish) => map[start] + 1 >= map[finish]);
+                var output = f(endIndex);
+                if (output != null && (lowestPath.Count == 0 || output.Count() < lowestPath.Count))
+                {
+                    lowestPath = output.ToList();
+                }
+            }
+
+            Console.WriteLine(string.Join(", ", lowestPath));
+            Console.WriteLine($"The shortest path is {lowestPath.Count}");
+
+            DrawMap(map, lowestPath, colCount);
         }
 
         private static string _testInput = @"Sabqponm
