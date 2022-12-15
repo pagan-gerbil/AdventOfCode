@@ -133,20 +133,6 @@ namespace AdventOfCode2022
         public class ArrayElement : IElement
         {
             public List<IElement> Elements { get; } = new List<IElement>();
-
-            //public bool Compare(IElement other)
-            //{
-            //    var otherArray = other as ArrayElement;
-            //    if (otherArray is null) return false;
-            //    if (otherArray.Elements.Count < this.Elements.Count) return false;
-
-            //    for (var i = 0; i < Elements.Count; i++)
-            //    {
-            //        if (!Elements[i].Compare(otherArray.Elements[i])) return false;
-            //    }
-
-            //    return true;
-            //}
         }
 
         public class IntElement : IElement
@@ -157,28 +143,69 @@ namespace AdventOfCode2022
             }
 
             public int Number { get; }
-
-            //public bool Compare(IElement other)
-            //{
-            //    var otherArray = other as ArrayElement;
-            //    if (otherArray is null)
-            //    {
-            //        return this.Number <= (other as IntElement).Number;
-            //    }
-
-            //    if (otherArray.Elements.Count() == 0) return false;
-
-            //    return this.Compare(otherArray.Elements.First());
-            //}
         }
 
-        public interface IElement 
-        {
-            //bool Compare(IElement other);
-        }
+        public interface IElement { }
 
         private static void Puzzle2()
         {
+            var rawInput = _input;
+
+            rawInput += @"
+[[2]]
+[[6]]";
+
+            var packets = rawInput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+            var comparer = new SComparer();
+
+            var orderedPackets = packets.OrderBy(x => x, comparer).ToList();
+
+            var decoder = (orderedPackets.IndexOf("[[2]]") + 1) * (orderedPackets.IndexOf("[[6]]") + 1);
+
+            Console.WriteLine($"The value of decoder is {decoder}");
+        }
+
+        public class SComparer : StringComparer
+        {
+            private Dictionary<string, ArrayElement> _cached = new Dictionary<string, ArrayElement>();
+
+            public override int Compare(string? x, string? y)
+            {
+                if (!_cached.ContainsKey(x))
+                {
+                    var ae = new ArrayElement();
+                    ParsePacket(x, 1, ae);
+                    _cached.Add(x, ae);
+                }
+
+                if (!_cached.ContainsKey(y))
+                {
+                    var ae = new ArrayElement();
+                    ParsePacket(y, 1, ae);
+                    _cached.Add(y, ae);
+                }
+
+                var packet1 = _cached[x];
+                var packet2 = _cached[y];
+
+                var i = 0;
+                var result = CompareArrays(packet1, packet2, i);
+                while (!result.HasValue)
+                    result = CompareArrays(packet1, packet2, ++i);
+
+                return result.Value ? -1 : 1;
+            }
+
+            public override bool Equals(string? x, string? y)
+            {
+                return x == y;
+            }
+
+            public override int GetHashCode(string obj)
+            {
+                return obj.GetHashCode();
+            }
         }
 
         private static string _testInput = @"[1,1,3,1,1]
