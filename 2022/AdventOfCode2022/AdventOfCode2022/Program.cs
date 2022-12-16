@@ -41,6 +41,11 @@
                 case 11: Day11.Run(puzzlePart); return;
                 case 12: Day12.Run(puzzlePart); return;
                 case 13: Day13.Run(puzzlePart); return;
+                case 14: Day14.Run(puzzlePart); return;
+                case 15: Day15.Run(puzzlePart); return;
+                case 16: Day16.Run(puzzlePart); return;
+                case 17: Day17.Run(puzzlePart); return;
+                case 18: Day18.Run(puzzlePart); return;
                 default: throw new NotImplementedException();
             }
         }
