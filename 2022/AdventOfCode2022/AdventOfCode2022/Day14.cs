@@ -10,11 +10,10 @@ namespace AdventOfCode2022
     {
         public static void Run(int puzzlePart)
         {
-            Puzzle1();
-            Puzzle2();
+            Puzzle(puzzlePart == 2);
         }
 
-        private static void Puzzle1()
+        private static void Puzzle(bool runTillBlocked)
         {
             var rocks = _input.Split(Environment.NewLine);
             var allRockCoords = new HashSet<(int, int)>();
@@ -61,10 +60,25 @@ namespace AdventOfCode2022
             var currentSand = (500, 0);
             while(!stop)
             {
-                if (currentSand.Item1 < minColumn || currentSand.Item1 > maxColumn || currentSand.Item2 > maxRows)
+                // Puzzle 1
+                if (!runTillBlocked && (currentSand.Item1 < minColumn || currentSand.Item1 > maxColumn || currentSand.Item2 > maxRows))
                 {
                     stop = true;
                     break;
+                }
+
+                // Puzzle 2
+                if (allRockCoords.Contains((500,0)))
+                {
+                    stop = true;
+                    break;
+                }
+
+                if (runTillBlocked && currentSand.Item2 > maxRows)
+                {
+                    if (!allRockCoords.Contains((currentSand.Item1 - 1, currentSand.Item2 + 2))) allRockCoords.Add((currentSand.Item1 - 1, currentSand.Item2 + 1));
+                    if (!allRockCoords.Contains((currentSand.Item1, currentSand.Item2 + 2))) allRockCoords.Add((currentSand.Item1, currentSand.Item2 + 1));
+                    if (!allRockCoords.Contains((currentSand.Item1 + 1, currentSand.Item2 + 2))) allRockCoords.Add((currentSand.Item1 + 1, currentSand.Item2 + 1));
                 }
 
                 if (!allRockCoords.Contains((currentSand.Item1, currentSand.Item2 + 1)))
@@ -101,7 +115,7 @@ namespace AdventOfCode2022
             var maxColumn = allRockCoords.Max(x => x.Item1);
 
             var maxRows = allRockCoords.Max(x => x.Item2);
-            var writer = File.AppendText(Path.Combine(AppContext.BaseDirectory, "day14output.txt"));
+            using var writer = File.AppendText(Path.Combine(AppContext.BaseDirectory, "day14output.txt"));
 
             for (var row = 0; row <= maxRows; row++)
             {
@@ -121,10 +135,6 @@ namespace AdventOfCode2022
                     }
                 }
             }
-        }
-
-        private static void Puzzle2()
-        {
         }
 
         private static string _testInput = @"498,4 -> 498,6 -> 496,6
