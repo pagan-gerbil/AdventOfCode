@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -12,7 +13,8 @@ namespace AdventOfCode2022
     {
         public static void Run(int puzzlePart)
         {
-            Puzzle1(2000000);
+            if (puzzlePart == 1) Puzzle1(2000000);
+            if (puzzlePart == 2) Puzzle2();
         }
 
         private static Regex _inputRegex = new Regex("Sensor at x=(?<sensorX>[-0-9]+), y=(?<sensorY>[-0-9]+): closest beacon is at x=(?<beaconX>[-0-9]+), y=(?<beaconY>[-0-9]+)");
@@ -61,8 +63,79 @@ namespace AdventOfCode2022
             Console.WriteLine($"There are {beaconCounter} possible positions");
         }
 
+        private static void AddToDictionary(Dictionary<long, List<(long x1, long x2)>> dictionary, long row, long x1, long x2)
+        {
+            if (!dictionary.ContainsKey(row))
+            {
+                dictionary.Add(row, new List<(long, long)>());
+            }
+
+            if (!dictionary[row].Any(existing => existing.x1 <= x1 && existing.x2 >= x2))
+            {
+                dictionary[row].Add((x1, x2));
+            }
+        }
+
         private static void Puzzle2()
         {
+            const int limit = 4000000;
+            var allSensors = new List<((long, long), long)>();
+            var allBeacons = new List<(long, long)>();
+
+            var allExclusions = new Dictionary<long, List<(long x1, long x2)>>();
+
+            foreach (var line in _input.Split(Environment.NewLine))
+            {
+                var match = _inputRegex.Match(line);
+                var sensorX = long.Parse(match.Groups["sensorX"].Value);
+                var sensorY = long.Parse(match.Groups["sensorY"].Value);
+                var beaconX = long.Parse(match.Groups["beaconX"].Value);
+                var beaconY = long.Parse(match.Groups["beaconY"].Value);
+
+                var diff = Math.Abs(sensorX - beaconX) + Math.Abs(sensorY - beaconY);
+                allSensors.Add(((sensorX, sensorY), diff));
+                allBeacons.Add((beaconX, beaconY));
+
+                AddToDictionary(allExclusions, sensorY, sensorX - diff, sensorX + diff);
+                for (var y = sensorY - diff; y <= sensorY + diff; y++)
+                {
+                    var remainingDiff = Math.Abs(Math.Abs(sensorY - y) - diff);
+                    AddToDictionary(allExclusions, y, sensorX - remainingDiff, sensorX + remainingDiff);
+                }
+            }
+
+            var maxColumns = allSensors.Max(x => x.Item1.Item1 + x.Item2);
+            var minColumns = allSensors.Min(x => x.Item1.Item1 - x.Item2);
+            var maxRows = allSensors.Max(x => x.Item1.Item2 + x.Item2);
+            var minRows = allSensors.Min(x => x.Item1.Item2 - x.Item2);
+
+            minRows = minRows > 0 ? minRows : 0;
+            maxRows = maxRows < limit ? maxRows : limit;
+            minColumns = minColumns > 0 ? minColumns : 0;
+            maxColumns = maxColumns < limit ? maxColumns : limit;
+
+            var beaconFrequency = 0l;
+
+            for (var y = minRows; y <= maxRows; y++)
+            {
+                var exclusions = allExclusions[y];
+
+                for (var x = 0l; x <= limit; x++)
+                {
+                    var exclusion = exclusions.FirstOrDefault(e => e.x1 <= x && e.x2 >= x);
+                    if (exclusion == default)
+                    {
+                        Console.WriteLine($"Apparently {x},{y}");
+                        beaconFrequency = (x * limit) + y;
+                        break;
+                    }
+                    x = exclusion.x2;
+                }
+
+                if (beaconFrequency > 0) break;
+            }
+
+            Console.WriteLine($"The beacon frequency is {beaconFrequency}");
         }
 
         private static string _testInput = @"Sensor at x=2, y=18: closest beacon is at x=-2, y=15
