@@ -1,50 +1,158 @@
-﻿namespace Day05
+﻿using System.Data;
+using System.Net.Http.Headers;
+
+namespace Day05
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            var input = _test1;
+            var input = _input1;
+
             Puzzle1(input);
             Puzzle2(input);
+        }
+
+        private static IReadOnlyDictionary<string, IEnumerable<Map>> GetMaps(IEnumerable<string> lines)
+        {
+            var maps = new Dictionary<string, IEnumerable<Map>>();
+
+            IList<Map> currentMap = new List<Map>();
+
+            foreach (var line in lines.Skip(1))
+            {
+                if (char.IsLetter(line[0]))
+                {
+                    currentMap = new List<Map>();
+                    maps.Add(line.Substring(0, line.IndexOf('-')), currentMap);
+                    continue;
+                }
+
+                var numbers = line.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToArray();
+
+                currentMap.Add(new Map(numbers[1], numbers[0], numbers[2]));
+            }
+
+            return maps;
         }
 
         private static void Puzzle1(string input)
         {
             var lines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-
+            var maps = GetMaps(lines);
             var initialSeeds = lines[0].Substring(lines[0].IndexOf(':') + 1).Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(long.Parse);
 
-            var lowest = GetLowestLocationNumber(lines, initialSeeds);
+            var lowest = long.MaxValue;
 
-            //var lowest = long.MaxValue;
-            
-            //foreach(var seed in initialSeeds)
-            //{
-            //    var newLowest = GetLowestLocationNumber(lines, seed, 0);
-            //    lowest = newLowest < lowest ? newLowest : lowest;
-            //}
+            foreach (var seed in initialSeeds)
+            {
+                var newLowest = GetLowestLocationNumber(lines, maps, seed);
+                lowest = newLowest < lowest ? newLowest : lowest;
+            }
             Console.WriteLine($"lowest location: {lowest}");
         }
 
         private static void Puzzle2(string input)
         {
             var lines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var maps = GetMaps(lines);
 
             var allNumbers = lines[0].Substring(lines[0].IndexOf(':') + 1).Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToArray();
 
-            var initialSeeds = new List<long>();
-            for (var i = 0; i<allNumbers.Count(); i+=2)
+            var lowest = long.MaxValue;
+
+            Console.WriteLine();
+            for (var i = 0; i < allNumbers.Length; i += 2)
             {
-                for (var j = 0; j < allNumbers[i+1]; j++)
-                {
-                    initialSeeds.Add(allNumbers[i] + j);
-                }
+                var seed = new SeedRange(allNumbers[i], allNumbers[i + 1] - 1);
+
+                var newLowest = GetLowestLocationNumber(maps, seed);
+                lowest = newLowest < lowest ? newLowest : lowest;
+
+                var cursor = Console.GetCursorPosition();
+                Console.SetCursorPosition(0, cursor.Top - 1);
+                Console.WriteLine($"Processing {i}");
             }
 
-            var lowest = GetLowestLocationNumber(lines, initialSeeds);
             Console.WriteLine($"lowest location: {lowest}");
         }
+
+        private static long GetLowestLocationNumber(IReadOnlyDictionary<string, IEnumerable<Map>> maps, SeedRange firstSeed)
+        {
+            var inQueue = new Queue<SeedRange>();
+            inQueue.Enqueue(firstSeed);
+            foreach (var map in maps)
+            {
+                var outQueue = new Queue<SeedRange>();
+
+                while (inQueue.Any())
+                {
+                    var seedRange = inQueue.Dequeue();
+
+                    var mapRange = map.Value.SingleOrDefault(x => x.SourceStart <= seedRange.Start && x.SourceEnd >= seedRange.Start);
+
+                    if (mapRange == null)
+                    {
+                        mapRange = map.Value.SingleOrDefault(x => x.SourceStart <= seedRange.Start + seedRange.Range && x.SourceEnd >= seedRange.Start + seedRange.Range);
+                        if (mapRange == null)
+                        {
+                            outQueue.Enqueue(seedRange);
+                            continue;
+                        }
+                        else
+                        {
+                            var distance = mapRange.SourceStart - seedRange.Start;
+                            outQueue.Enqueue(new SeedRange(seedRange.Start, distance));
+                            inQueue.Enqueue(new SeedRange(mapRange.SourceStart, seedRange.Range - distance));
+                            continue;
+                        }
+                    }
+
+                    if (mapRange.SourceEnd <= seedRange.Start + seedRange.Range)
+                    {
+                        var distance = seedRange.Start - mapRange.SourceStart;
+                        var remainder = seedRange.Start + seedRange.Range - mapRange.SourceEnd;
+                        outQueue.Enqueue(new SeedRange(mapRange.DestinationStart + distance, seedRange.Range - remainder));
+                        if (remainder > 0)
+                        {
+                            inQueue.Enqueue(new SeedRange(mapRange.SourceEnd + 1, remainder));
+                        }
+                        continue;
+                    }
+
+                    if (mapRange.SourceEnd >= seedRange.Start + seedRange.Range)
+                    {
+                        var distance = seedRange.Start - mapRange.SourceStart;
+                        outQueue.Enqueue(new SeedRange(mapRange.DestinationStart + distance, seedRange.Range));
+                        continue;
+                    }
+
+                    throw new Exception("Should never reach here...");
+                }
+
+                inQueue = outQueue;
+            }
+
+            return inQueue.Select(x => x.Start).Min();
+        }
+
+        private static long GetLowestLocationNumber(string[] lines, IReadOnlyDictionary<string, IEnumerable<Map>> maps, long seed)
+        {
+            var steps = new List<long>();
+
+            var currentValue = seed;
+            foreach (var mapList in maps)
+            {
+                var map = mapList.Value.SingleOrDefault(x => x.SourceStart <= currentValue && x.SourceEnd >= currentValue);
+                currentValue = map != null
+                    ? map.DestinationStart + (currentValue - map.SourceStart)
+                    : currentValue;
+                steps.Add(currentValue);
+            }
+
+            return steps.Last();
+        }
+
 
         private static long GetLowestLocationNumber(string[] lines, IEnumerable<long> initialSeeds)
         {
@@ -97,6 +205,18 @@
             public long SourceStart { get; set; }
             public long SourceEnd { get; set; }
             public long DestinationStart { get; set; }
+        }
+
+        public record SeedRange
+        {
+            public SeedRange(long start, long range)
+            {
+                Start = start;
+                Range = range;
+            }
+
+            public long Start { get; set;  }
+            public long Range { get; set; }
         }
 
         private static string _test1 = "seeds: 79 14 55 13\r\n\r\nseed-to-soil map:\r\n50 98 2\r\n52 50 48\r\n\r\nsoil-to-fertilizer map:\r\n0 15 37\r\n37 52 2\r\n39 0 15\r\n\r\nfertilizer-to-water map:\r\n49 53 8\r\n0 11 42\r\n42 0 7\r\n57 7 4\r\n\r\nwater-to-light map:\r\n88 18 7\r\n18 25 70\r\n\r\nlight-to-temperature map:\r\n45 77 23\r\n81 45 19\r\n68 64 13\r\n\r\ntemperature-to-humidity map:\r\n0 69 1\r\n1 0 69\r\n\r\nhumidity-to-location map:\r\n60 56 37\r\n56 93 4";
