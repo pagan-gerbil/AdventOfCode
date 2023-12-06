@@ -4,15 +4,55 @@
     {
         static void Main(string[] args)
         {
-            var lines = _input1.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var input = _test1;
+            Puzzle1(input);
+            Puzzle2(input);
+        }
+
+        private static void Puzzle1(string input)
+        {
+            var lines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
             var initialSeeds = lines[0].Substring(lines[0].IndexOf(':') + 1).Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(long.Parse);
 
+            var lowest = GetLowestLocationNumber(lines, initialSeeds);
+
+            //var lowest = long.MaxValue;
+            
+            //foreach(var seed in initialSeeds)
+            //{
+            //    var newLowest = GetLowestLocationNumber(lines, seed, 0);
+            //    lowest = newLowest < lowest ? newLowest : lowest;
+            //}
+            Console.WriteLine($"lowest location: {lowest}");
+        }
+
+        private static void Puzzle2(string input)
+        {
+            var lines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+            var allNumbers = lines[0].Substring(lines[0].IndexOf(':') + 1).Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToArray();
+
+            var initialSeeds = new List<long>();
+            for (var i = 0; i<allNumbers.Count(); i+=2)
+            {
+                for (var j = 0; j < allNumbers[i+1]; j++)
+                {
+                    initialSeeds.Add(allNumbers[i] + j);
+                }
+            }
+
+            var lowest = GetLowestLocationNumber(lines, initialSeeds);
+            Console.WriteLine($"lowest location: {lowest}");
+        }
+
+        private static long GetLowestLocationNumber(string[] lines, IEnumerable<long> initialSeeds)
+        {
             var maps = new Dictionary<string, IEnumerable<Map>>();
 
             IList<Map> currentMap = new List<Map>();
 
-            foreach (var line in lines.Skip(1)) 
+            foreach (var line in lines.Skip(1))
             {
                 if (char.IsLetter(line[0]))
                 {
@@ -31,7 +71,7 @@
             foreach (var seed in initialSeeds)
             {
                 var currentValue = seed;
-                foreach(var mapList in maps)
+                foreach (var mapList in maps)
                 {
                     var map = mapList.Value.SingleOrDefault(x => x.SourceStart <= currentValue && x.SourceEnd >= currentValue);
                     currentValue = map != null
@@ -42,9 +82,8 @@
             }
 
             Console.WriteLine($"There are {maps.Count} maps");
-            Console.WriteLine($"lowest location: {steps.Values.Select(x => x.Last()).Min()}");
+            return steps.Values.Select(x => x.Last()).Min();
         }
-
 
         private record Map
         {
