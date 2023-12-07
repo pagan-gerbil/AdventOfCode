@@ -23,10 +23,67 @@ namespace Day07
                 counter++;
             }
 
-            Console.WriteLine($"Winnings are: {total}"); // 250777413 is too high; 250469386 is too low, // 250752512 is wrong
+            Console.WriteLine($"Winnings are: {total}");
         }
 
-        private record Hand(string Cards, int Bet) { }
+        private record Hand
+        {
+            public Hand(string Cards, int Bet)
+            {
+                this.Cards = Cards;
+                this.Bet = Bet;
+                if (!this.Cards.Contains('J'))
+                {
+                    JokerCards = Cards;
+                }
+                else
+                {
+                    JokerCards = this.Cards.Distinct().Select(c => this.Cards.Replace('J', c)).OrderDescending(new HandStringComparer()).First();
+                }
+            }
+
+            public string Cards { get; }
+            public int Bet { get; }
+            public string JokerCards { get; }
+        }
+
+        private class HandStringComparer : IComparer<string>
+        {
+            public int Compare(string? x, string? y)
+            {
+                var xOfAKind = x.GroupBy(xx => xx);
+                var yOfAKind = y.GroupBy(yy => yy);
+
+                if (xOfAKind.Count() != yOfAKind.Count()) return yOfAKind.Count() - xOfAKind.Count();
+
+                if (xOfAKind.Select(xx => xx.Count()).Max() != yOfAKind.Select(yy => yy.Count()).Max()) return xOfAKind.Select(xx => xx.Count()).Max() - yOfAKind.Select(yy => yy.Count()).Max();
+
+                for (var i = 0; i <= 4; i++)
+                {
+                    if (x[i] == y[i]) continue;
+
+                    var xn = Translate(x[i]);
+                    var yn = Translate(y[i]);
+                    return xn - yn;
+                }
+
+                return 0;
+            }
+
+            private int Translate(char c)
+            {
+                switch (c)
+                {
+                    case 'A': return 14;
+                    case 'K': return 13;
+                    case 'Q': return 12;
+                    case 'J': return 11;
+                    case 'T': return 10;
+                    default:
+                        return int.Parse(c.ToString());
+                }
+            }
+        }
 
         private class HandComparer : IComparer<Hand>
         {
@@ -39,58 +96,24 @@ namespace Day07
 
             public int Compare(Hand? x, Hand? y)
             {
-                Console.Write($"Comparing {x.Cards} and {y.Cards} - ");
-                var result = 0;
-                if (!jokerMode)
-                {
-                    result = StraightCompare(x, y);
-                }
-                else
-                {
-                    result = JokerCompare(x, y);
-                }
-
-                Console.WriteLine(result);
+                //Console.Write($"Comparing {x.Cards} and {y.Cards} - ");
+                var result = StraightCompare(x, y);
+                //Console.WriteLine(result);
 
                 return result;
             }
 
             private int StraightCompare(Hand? x, Hand? y)
             {
-                var xOfAKind = x.Cards.GroupBy(xx => xx);
-                var yOfAKind = y.Cards.GroupBy(yy => yy);
+                string xCards = jokerMode ? x.JokerCards : x.Cards;
+                string yCards = jokerMode ? y.JokerCards : y.Cards;
+
+                var xOfAKind = xCards.GroupBy(xx => xx);
+                var yOfAKind = yCards.GroupBy(yy => yy);
 
                 if (xOfAKind.Count() != yOfAKind.Count()) return yOfAKind.Count() - xOfAKind.Count();
 
                 if (xOfAKind.Select(xx => xx.Count()).Max() != yOfAKind.Select(yy => yy.Count()).Max()) return xOfAKind.Select(xx => xx.Count()).Max() - yOfAKind.Select(yy => yy.Count()).Max();
-
-                for (var i = 0; i <= 4; i++)
-                {
-                    if (x.Cards[i] == y.Cards[i]) continue;
-
-                    var xn = Translate(x.Cards[i]);
-                    var yn = Translate(y.Cards[i]);
-                    return xn - yn;
-                }
-
-                return 0;
-            }
-
-            private int JokerCompare(Hand? x, Hand? y)
-            {
-                var xJoker = x.Cards.Count(xx => xx == 'J');
-                var yJoker = y.Cards.Count(yy => yy == 'J');
-                var xOfAKind = x.Cards.Distinct().ToDictionary(xx => xx, xx => x.Cards.Count(xxx => xxx == xx) + (xx != 'J' ? xJoker : 0));
-                var yOfAKind = y.Cards.Distinct().ToDictionary(yy => yy, yy => y.Cards.Count(yyy => yyy == yy) + (yy != 'J' ? yJoker : 0));
-
-                if (xOfAKind.Count(xx => xx.Key != 'J') != yOfAKind.Count(xx => xx.Key != 'J'))
-                    return (yOfAKind.Count(xx => xx.Key != 'J')) - (xOfAKind.Count(xx => xx.Key != 'J'));
-
-                if (xOfAKind.Select(xx => xx.Value).Max() 
-                    != yOfAKind.Select(yy => yy.Value).Max()) 
-                    
-                    return xOfAKind.Select(xx => xx.Value).Max() 
-                        - yOfAKind.Select(yy => yy.Value).Max();
 
                 for (var i = 0; i <= 4; i++)
                 {
