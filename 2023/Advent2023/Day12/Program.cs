@@ -1,5 +1,4 @@
-﻿using System.Security;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Day12
 {
@@ -9,24 +8,31 @@ namespace Day12
         {
             // day 12 is a picross solver
 
-            var input = _input;
+            var input = _test;
 
             var lines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
             var total = 0;
 
+            var repetitions = 4;
+
             foreach (var line in lines)
             {
-                var numbers = line.Split(' ')[1].Split(',', StringSplitOptions.TrimEntries).Select(int.Parse);
+                var numbers = line.Split(' ')[1].Split(',', StringSplitOptions.TrimEntries).Select(int.Parse).ToList();
                 var fields = line.Split(' ')[0].Trim();
+                for (var i = 0; i < repetitions; i++)
+                {
+                    numbers.AddRange(numbers);
+                    fields += fields;
+                }
 
                 var str = string.Empty;
                 foreach(var n in numbers)
                 {
-                    str += $"[#]{{{n}}}[.]+";
+                    str += $"[#?]{{{n}}}[.?]+";
                 }
                 str = str.Remove(str.Length - 1) + "*";
-                var regex = new Regex($"^[.]*{str}$");
+                var regex = new Regex($"^[.?]*{str}$");
 
                 var expandQueue = new Queue<string>();
                 expandQueue.Enqueue(fields);
@@ -39,12 +45,15 @@ namespace Day12
                     var i = current.IndexOf('?');
                     if (i >= 0)
                     {
-                        expandQueue.Enqueue(current.Remove(i, 1).Insert(i, "."));
-                        expandQueue.Enqueue(current.Remove(i, 1).Insert(i, "#"));
+                        var a = current.Remove(i, 1).Insert(i, ".");
+                        var b = current.Remove(i, 1).Insert(i, "#");
+
+                        if (regex.IsMatch(a)) expandQueue.Enqueue(a);
+                        if (regex.IsMatch(b)) expandQueue.Enqueue(b);
                     }
                     else
                     {
-                        allExpanded.Add(current);
+                        total += 1;
                     }
                 }
 
@@ -54,10 +63,10 @@ namespace Day12
                 //}
 
 
-                var matches = allExpanded.Count(regex.IsMatch);
+                //var matches = allExpanded.Count(regex.IsMatch);
                 //Console.WriteLine($"{matches} variations");
 
-                total += matches;
+                //total += matches;
             }
 
             Console.WriteLine($"Total of {total} variations");
