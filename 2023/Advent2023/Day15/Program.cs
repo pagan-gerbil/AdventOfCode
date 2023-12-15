@@ -1,5 +1,8 @@
 ﻿
+using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Formats.Asn1;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace Day15
@@ -12,6 +15,12 @@ namespace Day15
 
             var items = input.Split(',');
 
+            Puzzle1(items);
+            Puzzle2(items);
+        }
+
+        private static void Puzzle1(string[] items)
+        {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var total = items.Select(GetHash).Sum();
@@ -19,17 +28,97 @@ namespace Day15
             Console.WriteLine($"{stopwatch.ElapsedMilliseconds}ms elapsed");
         }
 
+        private static void Puzzle2(string[] items)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var boxes = new Dictionary<string,(int, int)>[256];
+            for(var i = 0; i < boxes.Length; i++)
+            {
+                boxes[i] = new Dictionary<string, (int, int)>();
+            }
+
+            var highestCounts = new Dictionary<int, int>();
+
+            foreach (var item in items)
+            {
+                var hash = GetHash2(item);
+                var box = hash.Item1;
+                var label = hash.Item2;
+                var dash = hash.Item3;
+                var lens = hash.Item4;
+
+                if (dash)
+                {
+                    if (boxes[box].ContainsKey(label)) boxes[box].Remove(label);
+                }
+                else
+                {
+                    if (boxes[box].ContainsKey(label))
+                    {
+                        var a = boxes[box][label];
+                        a.Item2 = lens;
+                        boxes[box][label] = a;
+                    }
+                    else
+                    {
+                        if (highestCounts.ContainsKey(box))
+                        {
+                            highestCounts[box]++;
+                        }
+                        else
+                        {
+                            highestCounts.Add(box, 1);
+                        }
+                        boxes[box].Add(label, (highestCounts[box], lens));
+                    }
+                }
+            }
+
+            var o = new OrderedDictionary();
+            
+            var total = 0;
+
+            total = boxes.SelectMany((b, i) => b.OrderBy(t => t.Value.Item1).Select((l, j) => (i + 1) * (j + 1) * l.Value.Item2)).Sum();
+
+            Console.WriteLine($"Puzzle 2: {total}");
+
+            Console.WriteLine($"{stopwatch.ElapsedMilliseconds}ms elapsed");
+        }
+
         private static int GetHash(string input)
         {
             var hash = 0;
 
-            foreach(var c in input)
+            foreach (var c in input)
             {
                 hash += (int)c;
                 hash *= 17;
                 hash = hash % 256;
             }
             return hash;
+        }
+
+        private static (int, string, bool, int) GetHash2(string input)
+        {
+            var hash = 0;
+            var dash = false;
+            var label = string.Empty;
+            var lens = 0;
+            foreach (var c in input)
+            {
+                if (char.IsLetter(c))
+                {
+                    label += c;
+                    hash += (int)c;
+                    hash *= 17;
+                    hash = hash % 256;
+                }
+                if (char.IsDigit(c)) lens = int.Parse(c.ToString());
+                if (c == '-') dash = true;
+            }
+            return (hash, label, dash, lens);
         }
 
         private static string _test = "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7";
