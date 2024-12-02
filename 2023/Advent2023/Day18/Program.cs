@@ -52,17 +52,39 @@ namespace Day18
 
             for (var i = lowestX; i <= highestX; i++)
             {
+                Console.Write($"{i}\t");
+                var highestJ = trenchList.Where(x => x.Item1 == i).Max(x => x.Item2);
+                var on = false;
+
+                var gapList = new List<int>();
                 for (var j = lowestY; j <= highestY; j++)
                 {
                     if (trenchList.Contains((i, j)))
                     {
-                        Console.Write('O');
+                        on = !on;
+                        while (trenchList.Contains((i, j)) && j <= highestY)
+                        {
+                            Console.Write('O');
+                            j++;
+                        }
+                        j--;
                     }
                     else
                     {
-                        Console.Write('.');
+                        if (j >= highestJ) on = false;
+                        var gapCount = 0;
+                        while (!trenchList.Contains((i, j)) && j <= highestY)
+                        {
+                            Console.Write(on ? '#' : '.');
+                            j++;
+                            gapCount++;
+                        }
+                        j--;
+                        gapList.Add(gapCount);
                     }
                 }
+                foreach (var gap in gapList) Console.Write($"\t{gap}");
+
                 Console.Write(Environment.NewLine);
             }
 
