@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-
-namespace Advent2024;
+﻿namespace Advent2024;
 internal class Day02
 {
     internal void RunPart1(bool test)
@@ -41,25 +39,63 @@ internal class Day02
         var input = test ? _sample : _part1;
 
         var splits = input.Split(Environment.NewLine);
-        var list1 = splits.Select(a => long.Parse(a.Substring(0, a.IndexOf(' ')))).ToArray();
-        var counts = splits
-            .Select(a => long.Parse(a.Substring(a.LastIndexOf(' '))))
-            .GroupBy(a => a)
-            .ToDictionary(a => a.Key, a => a.Count());
+        var list = splits.Select(a => a.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToArray()).ToArray();
 
-        var counter = 0L;
+        var counter = 0;
 
-        for (var i = 0; i < splits.Length; i++)
+        for (var i = 0; i < list.Length; i++)
         {
-            //var number = list1[i];
-            //if (!counts.TryGetValue(number, out var count))
-            //{
-            //    continue;
-            //}
-            //counter += (number * count);
+            var smallStack = new Stack<long[]>();
+            smallStack.Push(list[i]);
+            Console.Write(string.Join('\t', list[i].Select(a => a.ToString())));
+
+            var skipping = false;
+            while (smallStack.Any())
+            {
+                long[] report = smallStack.Pop();
+
+                var diffs = Enumerable.Range(0, report.Length - 1).Select(a => report[a] - report[a + 1]).ToArray();
+                if (diffs.Any(a => a > 3 || a < -3 || a == 0) || (diffs.Any(a => a > 0) && diffs.Any(a => a < 0)))
+                {
+                    if (skipping == true)
+                    {
+                        continue;
+                    }
+
+                    skipping = true;
+                    var indices = Enumerable.Range(0, report.Length);
+                    foreach (var r in indices)
+                    {
+                        long[] copy = [.. report.Take(r), .. report.Skip(r + 1)];
+
+                        smallStack.Push(copy);
+                    }
+
+                    continue;
+                }
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write(" - SUCCESS");
+                Console.ForegroundColor = ConsoleColor.White;
+                counter++;
+                break;
+            }
+
+            Console.WriteLine();
         }
 
         PrintAnswer(2, test, counter.ToString());
+    }
+
+    private bool IsValid(long l1, long l2, bool direction)
+    {
+        var diff = l1 - l2;
+        if (diff == 0) return false;
+        if (diff < 0 && direction) return false;
+        if (diff > 0 && !direction) return false;
+        diff = Math.Abs(diff);
+        if (diff < 1 || diff > 3) return false;
+        return true;
     }
 
     private void PrintAnswer(int part, bool test, string answer)
