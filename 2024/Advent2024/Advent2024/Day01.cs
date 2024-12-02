@@ -19,6 +19,32 @@ internal class Day01
         Console.WriteLine($"The final answer is {counter}");
     }
 
+    internal void RunPart2(bool test)
+    {
+        var input = test ? _sample : _part1;
+
+        var splits = input.Split(Environment.NewLine);
+        var list1 = splits.Select(a => long.Parse(a.Substring(0, a.IndexOf(' ')))).ToArray();
+        var counts = splits
+            .Select(a => long.Parse(a.Substring(a.LastIndexOf(' '))))
+            .GroupBy(a => a)
+            .ToDictionary(a => a.Key, a => a.Count());
+
+        var counter = 0L;
+
+        for (var i = 0; i < splits.Length; i++)
+        {
+            var number = list1[i];
+            if (!counts.TryGetValue(number, out var count))
+            {
+                continue;
+            }
+            counter += (number * count);
+        }
+
+        Console.WriteLine($"The final answer is {counter}");
+    }
+
     private string _sample = @"3   4
 4   3
 2   5
