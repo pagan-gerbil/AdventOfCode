@@ -1,19 +1,19 @@
 ﻿using System.Diagnostics;
-using System.Reflection.Emit;
 
 namespace AdventUtils;
 
 public abstract class DayBase
 {
-    protected abstract string _sample { get; }
+    protected abstract string _sample1 { get; }
+    protected virtual string _sample2 { get { return _sample1; } }
     protected abstract string _part1 { get; }
-    protected abstract string _part2 { get; }
+    protected virtual string _part2 { get { return _part1; } }
 
     public void Run()
     {
-        Part1(_sample, true);
+        Part1(_sample1, true);
         Part1(_part1, false);
-        Part2(_sample, true);
+        Part2(_sample2, true);
         Part2(_part2, false);
     }
 
@@ -29,7 +29,7 @@ public abstract class DayBase
     private void Part2(string input, bool isTest)
     {
         var stopwatch = Stopwatch.StartNew();
-        var answer = Part1Internal(input);
+        var answer = Part2Internal(input);
         stopwatch.Stop();
 
         PrintAnswer(2, isTest, answer, stopwatch.ElapsedMilliseconds);
