@@ -47,5 +47,5 @@ public abstract class DayBase
     }
 
     protected abstract string Part1Internal(string input);
-    protected abstract string Part2Internal(string input);
+    protected virtual string Part2Internal(string input) { return Part1Internal(input); }
 }
