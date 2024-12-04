@@ -42,7 +42,6 @@ public class Wordsearch
             ).ToArray());
         }).ToArray();
 
-        //verticals
         _verticalLines = indices.Select(a => new string(_horizontalLines.Select(b => b[a]).ToArray()));
     }
 
