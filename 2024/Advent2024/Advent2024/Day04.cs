@@ -60,4 +60,36 @@ internal class Day04 : DayBase
 
         return result.ToString();
     }
+
+    protected override string Part2Internal(string input)
+    {
+        var lines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
+        var indices = Enumerable.Range(0, lines[0].Length);
+        var maxLength = indices.Count();
+
+        var verticalLines = indices.Select(a => new string(lines.Select(b => b[a]).ToArray()));
+
+        var counter = 0;
+
+        for(var i = 1; i < maxLength-1; i++)
+        {
+            for (var j = 1; j < maxLength - 1; j++)
+            {
+                if (lines[i][j] != 'A') continue;
+
+                var top2 = new string([lines[i - 1][j - 1], lines[i - 1][j + 1]]);
+                var bottom2 = new string([lines[i + 1][j - 1], lines[i + 1][j + 1]]);
+
+                if ((top2 == "MM" && bottom2 == "SS") ||
+                    (top2 == "SS" && bottom2 == "MM") ||
+                    (top2 == "MS" && bottom2 == "MS") ||
+                    (top2 == "SM" && bottom2 == "SM"))
+                {
+                    counter++;
+                }
+            }
+        }
+
+        return counter.ToString();
+    }
 }
