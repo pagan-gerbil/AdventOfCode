@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,12 +16,19 @@ internal class Day06 : DayBase
 
     protected override string Part1Internal(string input)
     {
+        var visitedLocations = GetVisitedLocations(input);
+
+        return (visitedLocations.Count + 1).ToString();
+    }
+
+    private Dictionary<(int Row, int Column), Direction> GetVisitedLocations(string input)
+    {
         var lines = input.Split(Environment.NewLine);
 
         var startCoords = (Row: 0, Column: 0);
 
         var row = 0;
-        foreach(var l in lines)
+        foreach (var l in lines)
         {
             if (l.Contains('^'))
             {
@@ -33,13 +41,12 @@ internal class Day06 : DayBase
 
         var direction = Direction.Up;
 
-        var counter = 0;
-        var visitedLocations = new HashSet<(int Row, int Column)>();
+        var visitedLocations = new Dictionary<(int Row, int Column), Direction>();
 
         var finished = false;
         while (!finished)
         {
-            visitedLocations.Add(startCoords);
+            visitedLocations.TryAdd(startCoords, direction);
             var path = GetPath(direction, startCoords, lines);
             var block = path.IndexOf('#');
             var newCoords = (0, 0);
@@ -54,42 +61,84 @@ internal class Day06 : DayBase
             {
                 case Direction.Up:
                     newCoords = (startCoords.Row - block, startCoords.Column);
+                    if (visitedLocations.ContainsKey(newCoords) && visitedLocations[newCoords] == Direction.Up)
+                    {
+                        return null;
+                    }
                     for (var i = startCoords.Row - block; i <= startCoords.Row; i++)
                     {
-                        visitedLocations.Add((i, startCoords.Column));
+                        visitedLocations.TryAdd((i, startCoords.Column), direction);
                     }
                     break;
                 case Direction.Down:
                     newCoords = (startCoords.Row + block, startCoords.Column);
+                    if (visitedLocations.ContainsKey(newCoords) && visitedLocations[newCoords] == Direction.Down)
+                    {
+                        return null;
+                    }
                     for (var i = startCoords.Row; i <= startCoords.Row + block; i++)
                     {
-                        visitedLocations.Add((i, startCoords.Column));
+                        visitedLocations.TryAdd((i, startCoords.Column), direction);
                     }
                     break;
                 case Direction.Left:
                     newCoords = (startCoords.Row, startCoords.Column - block);
+                    if (visitedLocations.ContainsKey(newCoords) && visitedLocations[newCoords] == Direction.Left)
+                    {
+                        return null;
+                    }
                     for (var i = startCoords.Column - block; i <= startCoords.Column; i++)
                     {
-                        visitedLocations.Add((startCoords.Row, i));
+                        visitedLocations.TryAdd((startCoords.Row, i), direction);
                     }
                     break;
                 case Direction.Right:
                     newCoords = (startCoords.Row, startCoords.Column + block);
+                    if (visitedLocations.ContainsKey(newCoords) && visitedLocations[newCoords] == Direction.Right)
+                    {
+                        return null;
+                    }
                     for (var i = startCoords.Column; i <= startCoords.Column + block; i++)
                     {
-                        visitedLocations.Add((startCoords.Row, i));
+                        visitedLocations.TryAdd((startCoords.Row, i), direction);
                     }
                     break;
             }
 
             direction++;
             if (direction == Direction.Turn) direction = Direction.Up;
-            counter += block;
 
             startCoords = newCoords;
         }
 
-        return (visitedLocations.Count + 1).ToString();
+        return visitedLocations;
+    }
+
+    protected override string Part2Internal(string input)
+    {
+        var counter = 0;
+
+        var candidates = GetVisitedLocations(input);
+
+        foreach (var candidate in candidates) {
+            var lines = input.Split(Environment.NewLine);
+            var newLine = new string(
+                [
+                ..lines[candidate.Key.Row].Substring(0, candidate.Key.Column), 
+                '#', 
+                ..lines[candidate.Key.Row].Substring(candidate.Key.Column+1)]);
+
+            var trial = input.Replace(lines[candidate.Key.Row], newLine);
+
+            var path = GetVisitedLocations(trial);
+            if (path == null)
+            {
+                counter++;
+            }
+        }
+
+        return counter.ToString();
+        // 711 is too low
     }
 
     private List<char> GetPath(Direction direction, (int Row, int Column) startCoords, string[] lines)
