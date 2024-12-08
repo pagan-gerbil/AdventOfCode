@@ -1,5 +1,6 @@
 ﻿using AdventUtils;
 using AdventUtils.Models;
+using System.Net.Http.Headers;
 
 namespace Advent2024;
 
@@ -47,6 +48,52 @@ internal class Day08 : DayBase
                         antinodes.Add(an1);
                     if (an2.X >= 0 && an2.X < grid.Length && an2.Y >= 0 && an2.Y < grid.Length)
                         antinodes.Add(an2);
+                }
+            }
+        }
+
+        return antinodes.Count().ToString();
+    }
+
+    protected override string Part2Internal(string input)
+    {
+        var grid = input.Split(Environment.NewLine).Select(x => x.ToCharArray()).ToArray();
+
+        var antinodes = new HashSet<Coord>();
+
+        var antennae = grid
+            .SelectMany((x, i) => x.Select((y, j) => new AntennaPoint(i, j, y)))
+            .Where(x => x.Antenna != '.')
+            .GroupBy(x => x.Antenna)
+            .ToDictionary(x => x.Key, x => x.ToArray());
+
+        foreach (var a in antennae)
+        {
+            var q = new Stack<Coord>(a.Value);
+            while (q.Any())
+            {
+                var test = q.Pop();
+                var r = new Stack<Coord>(q);
+                while (r.Any())
+                {
+                    var test2 = r.Pop();
+                    var diff = new Coord(test.X - test2.X, test.Y - test2.Y);
+                    var an1 = test;
+                    while(an1.X < grid.Length && an1.Y < grid.Length && an1.X >= 0 && an1.Y >= 0)
+                    {
+                        antinodes.Add(an1);
+                        an1 = new Coord(
+                            an1.X + diff.X,
+                            an1.Y + diff.Y);
+                    }
+                    var an2 = test2;
+                    while (an2.X < grid.Length && an2.Y < grid.Length && an2.X >= 0 && an2.Y >= 0)
+                    {
+                        antinodes.Add(an2);
+                        an2 = new Coord(
+                            an2.X - diff.X,
+                            an2.Y - diff.Y);
+                    }
                 }
             }
         }
