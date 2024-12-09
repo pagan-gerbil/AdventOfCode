@@ -1,7 +1,9 @@
 ﻿using AdventUtils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,8 +18,6 @@ internal class Day09 : DayBase
 
     protected override string Part1Internal(string input)
     {
-        var builder = new StringBuilder();
-
         var isFile = true;
         var fileId = 0;
         var endFileId = input.Length / 2;
@@ -44,13 +44,165 @@ internal class Day09 : DayBase
 
             position += length;
 
-            //int nextChecksum = Enumerable.Range(position, length).Sum(x => x * id);
-            //checksum += position*id;
-            //checksum += nextChecksum;
-            //position += length;
-            //position++;
             isFile = !isFile;
         }
+
+        return checksum.ToString();
+    }
+
+    protected string Part2InternalA(string input)
+    {
+        var isFile = true;
+        var fileId = 0;
+        var endFileId = input.Length / 2;
+        var checksum = new BigInteger();
+        var position = 0;
+
+        var fileBlocks = new Dictionary<int, int>();
+        var bigArray = new int[input.Select(x => int.Parse(x.ToString())).Sum()];
+        for (var i = 0; i < input.Length; i++)
+        {
+            var fileLength = int.Parse(input[i].ToString());
+            if (isFile)
+            {
+                fileBlocks.Add(fileId, fileLength);
+                for (var j = position; j < position + fileLength; j++)
+                {
+                    bigArray[j] = fileId;
+                }
+                fileId++;
+            }
+            position += fileLength;
+
+            isFile = !isFile;
+        }
+
+        position = int.Parse(input[0].ToString());
+        var usedIds = new HashSet<int>();
+
+        for (var i = position; i < bigArray.Length; i++)
+        {
+            if (bigArray[i] > 0 && usedIds.Contains(bigArray[i]))
+            {
+                bigArray[i] = 0;
+                continue;
+            }
+
+
+            var numberOfSpaces = 0;
+            var j = bigArray[i];
+            while (j == 0)
+            {
+                j = bigArray[i + numberOfSpaces];
+                if (j == 0)
+                {
+                    numberOfSpaces++;
+                }
+            }
+
+            var files = fileBlocks.Where(x => numberOfSpaces > 0 && x.Value <= numberOfSpaces).Select(x => x.Key);
+            if (!files.Any()) continue;
+
+            var id = files.Max();
+
+            var fileLength = fileBlocks[id];
+            for (var k = i; k < i + fileLength; k++)
+            {
+                bigArray[k] = id;
+                fileBlocks.Remove(id);
+            }
+            usedIds.Add(id);
+            i += fileLength - 1;
+        }
+
+
+        checksum = bigArray.Select((x, i) => (long)x * (long)i).Sum();
+
+        return checksum.ToString();
+    }
+
+    protected override string Part2Internal(string input)
+    {
+        var isFile = true;
+        var fileId = 0;
+        var endFileId = input.Length / 2;
+        var checksum = new BigInteger();
+        var position = 0;
+
+        var fileBlocks = new Dictionary<int, int>();
+        var bigArray = new int[input.Select(x => int.Parse(x.ToString())).Sum()];
+        var spaces = new Dictionary<int, int>();
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var fileLength = int.Parse(input[i].ToString());
+            if (isFile)
+            {
+                fileBlocks.Add(fileId, fileLength);
+                for (var j = position; j < position + fileLength; j++)
+                {
+                    bigArray[j] = fileId;
+                }
+                fileId++;
+            }
+            else
+            {
+                spaces.Add(position, fileLength);
+            }
+            position += fileLength;
+
+            isFile = !isFile;
+        }
+
+        position = int.Parse(input[0].ToString());
+        var usedIds = new HashSet<int>();
+        var theLowestSpace = int.Parse(input[0].ToString());
+        var firstRun = true;
+        foreach (var id in fileBlocks.Keys.OrderByDescending(x=>x))
+        {
+            int idIndex = Array.FindIndex(bigArray, x => x == id);
+
+            var numberOfSpaces = 0;
+            var offset = theLowestSpace;
+            var firstSpace = 0;
+            firstRun = true;
+            while (numberOfSpaces < fileBlocks[id] && offset < idIndex)
+            {
+                firstSpace = Array.FindIndex(bigArray, offset, x => x == 0);
+                if (firstRun)
+                {
+                    theLowestSpace = firstSpace;
+                    firstRun = false;
+                }
+                var i = firstSpace;
+                numberOfSpaces = 0;
+                while (i < bigArray.Length && bigArray[i] == 0)
+                {
+                    numberOfSpaces++;
+                    i++;
+                }
+                offset += numberOfSpaces;
+            }
+
+            if (numberOfSpaces >= fileBlocks[id])
+            {
+                var oldIndex = idIndex;
+
+                if (oldIndex <= firstSpace) continue;
+                for (var i = 0; i < fileBlocks[id]; i++)
+                {
+                    bigArray[firstSpace + i] = id;
+                    if (oldIndex >= 0)
+                    {
+                        bigArray[oldIndex + i] = 0;
+                    }
+                }
+            }
+        }
+
+
+
+        checksum = bigArray.Select((x, i) => (long)x * (long)i).Sum();
 
         return checksum.ToString();
     }
