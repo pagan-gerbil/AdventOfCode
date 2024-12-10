@@ -16,7 +16,25 @@ internal class Day10 : DayBase
 
     protected override string Part1Internal(string input)
     {
-        var grid = input.Split(Environment.NewLine).Select(x => x.ToCharArray().Select(y=>int.Parse(y.ToString())).ToArray()).ToArray();
+        IEnumerable<IGrouping<Coord, Trail>> groups = GetTrails(input);
+        var result = groups.Sum(x => x.Select(y => y.Current).Distinct().Count());
+
+        return result.ToString();
+    }
+
+    protected override string Part2Internal(string input)
+    {
+        var trails = GetTrails(input);
+
+        var result = trails.Sum(x=>x.Count());
+
+        return result.ToString();
+    }
+
+
+    private static IEnumerable<IGrouping<Coord, Trail>> GetTrails(string input)
+    {
+        var grid = input.Split(Environment.NewLine).Select(x => x.ToCharArray().Select(y => int.Parse(y.ToString())).ToArray()).ToArray();
 
         var height = grid.Length;
         var width = grid[0].Length;
@@ -50,9 +68,7 @@ internal class Day10 : DayBase
         }
 
         var groups = finishedTrails.GroupBy(x => x.Start);
-        var result = groups.Sum(x => x.Select(y => y.Current).Distinct().Count());
-
-        return result.ToString();
+        return groups;
     }
 
     private struct Trail(Coord start, Coord current)
