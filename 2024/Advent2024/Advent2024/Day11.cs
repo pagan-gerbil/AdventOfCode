@@ -1,6 +1,7 @@
 ﻿using AdventUtils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,39 +17,86 @@ internal class Day11 : DayBase
 
     protected override string Part1Internal(string input)
     {
-        var longs = input.Split(' ').Select(long.Parse);
-        var stones = new List<(long Stone, int Blinks)>(longs.Select(x => (x, 25)));
+        return CountStones(input, 25).ToString();
+    }
 
-        var lowestIndex = 0;
+    protected override string Part2Internal(string input)
+    {
+        return CountStones(input, 75).ToString();
+    }
 
-        while (stones.Any(x => x.Blinks > 0))
+    private long CountStones(string input, int numberOfBlinks)
+    {
+        var lookup = new Dictionary<long, IEnumerable<long>>();
+
+        var resultsLookup = new Dictionary<long, Dictionary<int, long>>();
+
+        long[] stones = input.Split(' ').Select(long.Parse).ToArray();
+        var counter = 0L;
+
+        var items = new Stack<(long Value, int Steps)>(stones.Select(x => (Value: x, Steps: numberOfBlinks)));
+
+        while (items.Any())
         {
-            for (var i = lowestIndex; i < stones.Count; i++)
+            var i = items.Pop();
+            var offset = 1;
+            if (i.Steps == 0)
             {
-                var item = stones[i];
-                if (item.Blinks == 0)
-                {
-                    lowestIndex = i;
-                    continue;
-                }
+                counter++;
+                continue;
+            }
 
-                if (item.Stone == 0)
-                {
-                    stones[i] = (1, item.Blinks-1);
-                    break;
-                }
+            counter += CountChildren(i, lookup, resultsLookup);
+        }
 
-                if (item.Stone.ToString().Length % 2 == 0)
-                {
-                    stones[i] = (long.Parse(item.Stone.ToString().Substring(0, item.Stone.ToString().Length / 2)), item.Blinks - 1);
-                    stones.Insert(i + 1, (long.Parse(item.Stone.ToString().Substring(item.Stone.ToString().Length / 2)), item.Blinks - 1));
-                    break;
-                }
+        return counter;
+    }
 
-                stones[i] = (item.Stone * 2024, item.Blinks - 1);
+    private long CountChildren((long Value, int Steps) i, Dictionary<long, IEnumerable<long>> lookup, Dictionary<long, Dictionary<int, long>> resultsLookup)
+    {
+        if (resultsLookup.TryGetValue(i.Value, out var stepsLookup))
+        {
+            if (stepsLookup.TryGetValue(i.Steps, out var result))
+            {
+                return result;
             }
         }
 
-        return stones.Count.ToString();
+        if (i.Steps == 0)
+        {
+            return 1;
+        }
+
+        if (!lookup.ContainsKey(i.Value))
+        {
+            var v = i.Value;
+            if (v == 0)
+            {
+                lookup.Add(0, [1]);
+            }
+            else
+            {
+                var vs = v.ToString();
+                if (vs.Length % 2 == 0)
+                {
+                    var chunkLength = vs.Length / 2;
+                    lookup.Add(v, Enumerable.Range(0, vs.Length / chunkLength).Select(d => long.Parse(vs.Substring(d * chunkLength, chunkLength))).ToArray());
+
+                }
+                else
+                {
+                    lookup.Add(v, [v * 2024]);
+                }
+            }
+        }
+
+        var count = 0L;
+        foreach (var l in lookup[i.Value])
+        {
+            count += CountChildren((Value: l, Steps: i.Steps - 1), lookup, resultsLookup);
+        }
+        resultsLookup.TryAdd(i.Value, new Dictionary<int, long>());
+        resultsLookup[i.Value].TryAdd(i.Steps, count);
+        return count;
     }
 }
