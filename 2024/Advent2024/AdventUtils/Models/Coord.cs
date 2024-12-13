@@ -3,10 +3,10 @@
 namespace AdventUtils.Models;
 
 [DebuggerDisplay("x = {X} y = {Y}")]
-public class Coord(int x, int y)
+public class Coord(long x, long y)
 {
-    public int X { get; } = x;
-    public int Y { get; } = y;
+    public long X { get; } = x;
+    public long Y { get; } = y;
 
     public override bool Equals(object? obj)
     {

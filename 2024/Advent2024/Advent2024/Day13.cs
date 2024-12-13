@@ -14,6 +14,18 @@ internal class Day13 : DayBase
 
     protected override string Part1Internal(string input)
     {
+        long counter = Calculate(input, 0);
+
+        return counter.ToString();
+    }
+
+    protected override string Part2Internal(string input)
+    {
+        return Calculate(input, 10000000000000).ToString();
+    }
+
+    private static long Calculate(string input, long modifier)
+    {
         var lines = input.Split(Environment.NewLine);
 
         var machines = new List<ClawMachine>();
@@ -49,17 +61,17 @@ internal class Day13 : DayBase
         foreach (var machine in machines)
         {
             var point = new Coord(0, 0);
-            var cost = 0;
-            var n = 0;
-            var answers = new List<int>();
-            while (point.X < machine.Target.X && point.Y < machine.Target.Y)
+            var cost = 0L;
+            var n = 0L;
+            var answers = new List<long>();
+            while (point.X < machine.Target.X + modifier && point.Y < machine.Target.Y + modifier)
             {
                 point = new Coord(point.X + machine.A.X, point.Y + machine.A.Y);
                 cost += 3;
                 n++;
             }
 
-            if (point.X == machine.Target.X && point.Y == machine.Target.Y)
+            if (point.X == machine.Target.X + modifier && point.Y == machine.Target.Y + modifier)
             {
                 answers.Add(cost);
             }
@@ -70,13 +82,13 @@ internal class Day13 : DayBase
                 cost -= 3;
                 n--;
 
-                while (point.X < machine.Target.X && point.Y < machine.Target.Y)
+                while (point.X < machine.Target.X + modifier && point.Y < machine.Target.Y + modifier)
                 {
                     point = new Coord(point.X + machine.B.X, point.Y + machine.B.Y);
                     cost += 1;
                 }
 
-                if (point.X == machine.Target.X && point.Y == machine.Target.Y)
+                if (point.X == machine.Target.X + modifier && point.Y == machine.Target.Y + modifier)
                 {
                     answers.Add(cost);
                 }
@@ -88,7 +100,7 @@ internal class Day13 : DayBase
             }
         }
 
-        return counter.ToString();
+        return counter;
     }
 
     private record struct ClawMachine(Coord A, Coord B, Coord Target);
