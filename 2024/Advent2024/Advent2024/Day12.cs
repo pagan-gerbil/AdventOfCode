@@ -52,6 +52,8 @@ internal class Day12 : DayBase
                 var perimeter = 0;
                 var sides = 0;
 
+                var cellsInThisRegion = new List<Coord>();
+
                 while (adjacents.Any())
                 {
                     var next = adjacents.Dequeue();
@@ -64,6 +66,7 @@ internal class Day12 : DayBase
                         if (next.X < height - 1) adjacents.Enqueue(new Coord(next.X + 1, next.Y)); else perimeter++;
                         if (next.Y < width - 1) adjacents.Enqueue(new Coord(next.X, next.Y + 1)); else perimeter++;
                         visitedLocations.Add(next);
+                        cellsInThisRegion.Add(next);
                     }
                     else
                     {
@@ -71,10 +74,121 @@ internal class Day12 : DayBase
                     }
                 }
 
+                sides = GetNumberOfSidesX(cellsInThisRegion) + GetNumberOfSidesY(cellsInThisRegion);
+
                 counter += countSidesNotPerimeter ? (area * sides) : (area * perimeter);
             }
         }
 
         return counter;
     }
+
+    private static int GetNumberOfSidesX(List<Coord> cellsInThisRegion)
+    {
+        var result = 0;
+
+        var rows = cellsInThisRegion.Select(x => x.X).Distinct().Order().ToArray();
+
+        if (rows.Length == 1) return 2;
+
+        var lastRow = new List<(long min, long max)>();
+
+        for (var r = 0; r < rows.Count(); r++)
+        {
+            var cells = cellsInThisRegion.Where(x => x.X == rows[r]).Select(x => x.Y).Order().ToArray();
+
+            var contiguousSetsInRow = new List<(long min, long max)>();
+            var current = (min: cells.First(), max: 0L);
+            for (var i = 1; i < cells.Length; i++)
+            {
+                if (cells[i] == cells[i - 1] + 1)
+                {
+                    continue;
+                }
+                current.max = cells[i - 1];
+                contiguousSetsInRow.Add(current);
+                current = new (cells[i], cells[i]);
+            }
+            if (!contiguousSetsInRow.Contains(current))
+            {
+                current.max = cells[cells.Length - 1];
+                contiguousSetsInRow.Add(current);
+            }
+
+            if (r == 0)
+            {
+                result++;
+                lastRow = contiguousSetsInRow;
+                continue;
+            }
+
+            var count = contiguousSetsInRow.Count * 2;
+            count -= contiguousSetsInRow.Sum(x => lastRow.Count(y => y.min == x.min)) + contiguousSetsInRow.Sum(x=>lastRow.Count(y=>y.max == x.max));
+            result += count;
+
+            lastRow = contiguousSetsInRow;
+
+            if (r + 1 == rows.Count())
+            {
+                result += contiguousSetsInRow.Count;
+            }
+        }
+
+        return result;
+    }
+
+    private static int GetNumberOfSidesY(List<Coord> cellsInThisRegion)
+    {
+        var result = 0;
+
+        var columns = cellsInThisRegion.Select(x => x.Y).Distinct().Order().ToArray();
+
+        if (columns.Length == 1) return 2;
+
+        var lastColumn = new List<(long min, long max)>();
+
+        for (var c = 0; c < columns.Count(); c++)
+        {
+            var cells = cellsInThisRegion.Where(x => x.Y == columns[c]).Select(x => x.X).Order().ToArray();
+
+            var contiguousSetsInColumn = new List<(long min, long max)>();
+            var current = (min: cells.First(), max: 0L);
+            for (var i = 1; i < cells.Length; i++)
+            {
+                if (cells[i] == cells[i - 1] + 1)
+                {
+                    continue;
+                }
+                current.max = cells[i - 1];
+                contiguousSetsInColumn.Add(current);
+                current = new(cells[i], cells[i]);
+            }
+            if (!contiguousSetsInColumn.Contains(current))
+            {
+                current.max = cells[cells.Length - 1];
+                contiguousSetsInColumn.Add(current);
+            }
+
+            if (c == 0)
+            {
+                result++;
+                lastColumn = contiguousSetsInColumn;
+                continue;
+            }
+
+            var count = contiguousSetsInColumn.Count * 2;
+            count -= contiguousSetsInColumn.Sum(x => lastColumn.Count(y => y.min == x.min)) + contiguousSetsInColumn.Sum(x => lastColumn.Count(y => y.max == x.max));
+            result += count;
+
+            lastColumn = contiguousSetsInColumn;
+
+            if (c + 1 == columns.Count())
+            {
+                result += contiguousSetsInColumn.Count;
+            }
+        }
+
+        return result;
+    }
+
 }
