@@ -48,27 +48,38 @@ internal class Day13 : DayBase
 
         foreach (var machine in machines)
         {
-            var q = new Stack<Track>();
-            q.Push(new Track(new Coord(0, 0), 0));
-            var answers = new List<long>();
-
-            while (q.Any())
+            var point = new Coord(0, 0);
+            var cost = 0;
+            var n = 0;
+            var answers = new List<int>();
+            while (point.X < machine.Target.X && point.Y < machine.Target.Y)
             {
-                var current = q.Pop();
+                point = new Coord(point.X + machine.A.X, point.Y + machine.A.Y);
+                cost += 3;
+                n++;
+            }
 
-                if (current.Point.X > machine.Target.X || current.Point.Y > machine.Target.Y)
+            if (point.X == machine.Target.X && point.Y == machine.Target.Y)
+            {
+                answers.Add(cost);
+            }
+
+            while (n > 0)
+            {
+                point = new Coord(point.X - machine.A.X, point.Y - machine.A.Y);
+                cost -= 3;
+                n--;
+
+                while (point.X < machine.Target.X && point.Y < machine.Target.Y)
                 {
-                    continue;
+                    point = new Coord(point.X + machine.B.X, point.Y + machine.B.Y);
+                    cost += 1;
                 }
 
-                if (current.Point.X == machine.Target.X || current.Point.Y == machine.Target.Y)
+                if (point.X == machine.Target.X && point.Y == machine.Target.Y)
                 {
-                    answers.Add(current.Cost);
-                    continue;
+                    answers.Add(cost);
                 }
-
-                q.Push(new Track(new Coord(current.Point.X + machine.A.X, current.Point.Y + machine.A.Y), current.Cost += 3));
-                q.Push(new Track(new Coord(current.Point.X + machine.B.X, current.Point.Y + machine.B.Y), current.Cost += 1));
             }
 
             if (answers.Any())
@@ -77,13 +88,8 @@ internal class Day13 : DayBase
             }
         }
 
-
-
-
-
         return counter.ToString();
     }
 
     private record struct ClawMachine(Coord A, Coord B, Coord Target);
-    private record struct Track(Coord Point, long Cost);
 }
