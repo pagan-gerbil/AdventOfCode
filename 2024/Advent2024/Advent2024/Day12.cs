@@ -13,6 +13,20 @@ internal class Day12 : DayBase
 
     protected override string Part1Internal(string input)
     {
+        long counter = GetAreaValues(input, false);
+
+        return counter.ToString();
+    }
+
+    protected override string Part2Internal(string input)
+    {
+        long counter = GetAreaValues(input, true);
+
+        return counter.ToString();
+    }
+
+    private static long GetAreaValues(string input, bool countSidesNotPerimeter)
+    {
         var grid = input.Split(Environment.NewLine).Select(x => x.ToCharArray()).ToArray();
 
         var height = grid.Length;
@@ -25,7 +39,7 @@ internal class Day12 : DayBase
 
         var counter = 0L;
 
-        for(var x = 0; x < height; x++)
+        for (var x = 0; x < height; x++)
         {
             for (var y = 0; y < width; y++)
             {
@@ -38,6 +52,7 @@ internal class Day12 : DayBase
                 var letter = grid[x][y];
                 var area = 0;
                 var perimeter = 0;
+                var sides = 0;
 
                 while (adjacents.Any())
                 {
@@ -58,10 +73,10 @@ internal class Day12 : DayBase
                     }
                 }
 
-                counter += (area * perimeter);
+                counter += countSidesNotPerimeter ? (area * sides) : (area * perimeter);
             }
         }
 
-        return counter.ToString();
+        return counter;
     }
 }
