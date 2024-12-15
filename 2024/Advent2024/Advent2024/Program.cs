@@ -1,4 +1,4 @@
 ﻿using Advent2024;
 
-var puzzle = new Day14();
+var puzzle = new Day15();
 puzzle.Run();
