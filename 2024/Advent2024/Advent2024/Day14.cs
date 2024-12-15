@@ -1,5 +1,6 @@
 ﻿using AdventUtils;
 using AdventUtils.Models;
+using Microsoft.Win32;
 using System.Windows.Markup;
 using System.Xml;
 
@@ -29,6 +30,41 @@ internal class Day14 : DayBase
         var quadrant4 = robots.Count(x => x.Position.X > maxX / 2 && x.Position.Y > maxY / 2);
 
         return (quadrant1 * quadrant2 * quadrant3 * quadrant4).ToString();
+    }
+
+    protected override string Part2Internal(string input)
+    {
+        var robots = input.Split(Environment.NewLine).Select(x => new Robot(ParseCoord(x, false), ParseCoord(x, true))).ToArray();
+        if (input != _part1) return string.Empty;
+        var maxX = 101;
+        var maxY = 103;
+        var seconds = 0;
+
+        while (true) 
+        {
+            foreach (var r in robots) r.Move(maxX, maxY);
+
+            for (var j = 0; j < maxY; j++)
+            {
+                for (var i = 0; i < maxX; i++)
+                {
+                    var count = robots.Count(r=>r.Position.X == i && r.Position.Y == j);
+                    if (count == 0) Console.Write(' '); else Console.Write('X');
+                }
+                Console.WriteLine(Environment.NewLine);
+            }
+            Console.WriteLine(seconds++);
+            var k = Console.ReadKey();
+            if (k.KeyChar == 'q') break;
+        }
+
+        var quadrant1 = robots.Count(x => x.Position.X < maxX / 2 && x.Position.Y < maxY / 2);
+        var quadrant2 = robots.Count(x => x.Position.X > maxX / 2 && x.Position.Y < maxY / 2);
+        var quadrant3 = robots.Count(x => x.Position.X < maxX / 2 && x.Position.Y > maxY / 2);
+        var quadrant4 = robots.Count(x => x.Position.X > maxX / 2 && x.Position.Y > maxY / 2);
+
+        return (quadrant1 * quadrant2 * quadrant3 * quadrant4).ToString();
+
     }
 
     private Coord ParseCoord(string input, bool reverse)
