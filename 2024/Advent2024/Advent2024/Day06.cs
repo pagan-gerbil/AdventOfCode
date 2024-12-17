@@ -1,10 +1,5 @@
 ﻿using AdventUtils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+using AdventUtils.Models;
 
 namespace Advent2024;
 
@@ -161,14 +156,5 @@ internal class Day06 : DayBase
         }
 
         return path ?? new List<char>();
-    }
-
-    private enum Direction
-    {
-        Up,
-        Right,
-        Down,
-        Left,
-        Turn
     }
 }
