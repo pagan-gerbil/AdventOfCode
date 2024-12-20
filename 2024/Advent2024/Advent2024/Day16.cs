@@ -23,12 +23,12 @@ internal class Day16 : DayBase
         {
             for (var x = 0; x < grid[0].Length; x++)
             {
-                if (grid[y][x] == 'S')
+                if (grid[y][x] == 'E')
                 {
                     target = new Coord(x, y);
                     continue;
                 }
-                if (grid[y][x] == 'E')
+                if (grid[y][x] == 'S')
                 {
                     start = new Coord(x, y);
                     continue;
@@ -48,28 +48,30 @@ internal class Day16 : DayBase
 
         var startPath = new Path(0, Direction.Right, start);
 
-        var paths = new Stack<Path>();
-        paths.Push(startPath);
+        var paths = new Queue<Path>();
+        paths.Enqueue(startPath);
         var bestScore = long.MaxValue;
+        var visitedLocations = new HashSet<(Coord, Direction)>();
 
         while (paths.Any())
         {
-            var path = paths.Pop();
+            var path = paths.Dequeue();
+            visitedLocations.Add((path.Position, path.Direction));
 
             if (!path.LastTurnedRight)
             {
                 var right = path.TurnRight();
-                if (right.Score < bestScore && grid[right.Position.Y][right.Position.X] == '.' && !right.VisitedLocations.Contains(right.Position)) paths.Push(right);
+                if (right.Score < bestScore && grid[right.Position.Y][right.Position.X] != '#' && !visitedLocations.Contains((right.Position, right.Direction))) paths.Enqueue(right);
                 bestScore = right.Check(target, bestScore);
             }
             if (!path.LastTurnedLeft)
             {
                 var left = path.TurnLeft();
-                if (left.Score < bestScore && grid[left.Position.Y][left.Position.X] == '.' && !left.VisitedLocations.Contains(left.Position)) paths.Push(left);
+                if (left.Score < bestScore && grid[left.Position.Y][left.Position.X] != '#' && !visitedLocations.Contains((left.Position, left.Direction))) paths.Enqueue(left);
                 bestScore = left.Check(target, bestScore);
             }
             var forward = path.MoveForward();
-            if (forward.Score < bestScore && grid[forward.Position.Y][forward.Position.X] == '.' && !forward.VisitedLocations.Contains(forward.Position)) paths.Push(forward);
+            if (forward.Score < bestScore && grid[forward.Position.Y][forward.Position.X] != '#' && !visitedLocations.Contains((forward.Position, forward.Direction))) paths.Enqueue(forward);
 
             bestScore = forward.Check(target, bestScore);
         }
@@ -98,12 +100,11 @@ internal class Day16 : DayBase
         }
     }
 
-    private class Path(long score, Direction direction, Coord position, HashSet<Coord> visitedLocations = null)
+    private class Path(long score, Direction direction, Coord position)
     {
         public long Score { get; set; } = score;
         public Coord Position { get; set; } = position;
         public Direction Direction { get; set; } = direction;
-        public HashSet<Coord> VisitedLocations { get; } = visitedLocations ?? new HashSet<Coord>();
 
         public bool LastTurnedLeft { get; set; }
         public bool LastTurnedRight { get; set; }
@@ -128,7 +129,6 @@ internal class Day16 : DayBase
 
         public Path MoveForward(long score, Direction newDirection, bool lastTurnedLeft, bool lastTurnedRight)
         {
-            VisitedLocations.Add(Position);
             Coord newPosition = null;
             switch (newDirection)
             {
@@ -146,7 +146,7 @@ internal class Day16 : DayBase
                     break;
             }
 
-            return new Path(score + 1, newDirection, newPosition, new HashSet<Coord>(VisitedLocations))
+            return new Path(score + 1, newDirection, newPosition)
             {
                 LastTurnedLeft = lastTurnedLeft,
                 LastTurnedRight = lastTurnedRight
