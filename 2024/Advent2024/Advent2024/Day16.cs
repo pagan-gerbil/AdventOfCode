@@ -50,6 +50,9 @@ internal class Day16 : DayBase
 
         var paths = new Queue<Path>();
         paths.Enqueue(startPath);
+        paths.Enqueue(new Path(1000, Direction.Down, start));
+        paths.Enqueue(new Path(2000, Direction.Left, start));
+        paths.Enqueue(new Path(1000, Direction.Up, start));
         var bestScore = long.MaxValue;
         var visitedLocations = new HashSet<(Coord, Direction)>();
 
